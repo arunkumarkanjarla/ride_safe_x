@@ -1,0 +1,35 @@
+/* Admin portal → Agent portal control (A31). Loaded by the admin portal only. */
+.agc{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0}
+.agc-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:12px;font-size:12.5px}
+.agc-bar .sp{flex:1}
+.agc-bar a.dbtn{text-decoration:none}
+.agc-ver b{font-weight:700}
+.agc-tabs span{cursor:pointer}
+.agc-tabs span:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.agc-body{display:flex;flex-direction:column;gap:12px;min-height:0;overflow:auto;padding-bottom:4px}
+.agc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.agc-form{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.agc-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.agc-acts{display:inline-flex;gap:6px}
+.agc-note{color:var(--muted);font-size:12px;margin:0}
+.agc-empty{color:var(--muted);text-align:center}
+.agc-clip{display:block;max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.agc-langs{max-width:150px}
+.agc-num{width:90px}
+.agc-txt{width:160px}
+.agc-code{width:110px;letter-spacing:.2em}
+.agc-num,.agc-txt,.agc-sel,.agc-ta{font:inherit;font-size:12.5px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:#fff}
+.agc-ta{width:100%;box-sizing:border-box;resize:vertical}
+.agc-check{display:inline-flex;align-items:center;gap:6px;font-size:13px;margin-right:12px}
+.agc-checks{display:flex;flex-wrap:wrap;gap:6px 0;margin-top:4px}
+.agc-kv{display:grid;grid-template-columns:180px 1fr;gap:6px 12px;margin:0;font-size:13px}
+.agc-kv dt{color:var(--muted)}
+.agc-kv dd{margin:0}
+.agc-dialog{min-width:440px}
+.agc-dialog .rn-f.block{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.agc-dialog textarea,.agc-dialog input[type="text"],.agc-dialog select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:7px}
+.agc-dtitle{font-weight:700;font-size:15px;margin:0 0 10px}
+.agc-err{color:#B42318;font-size:12.5px;margin:0 0 8px}
+.dt input[type="checkbox"],.agc input[type="checkbox"]{width:16px;height:16px;accent-color:var(--brand)}
+.dbtn[disabled]{opacity:.45;cursor:not-allowed}
+@media (max-width:1100px){.agc-grid{grid-template-columns:1fr}}

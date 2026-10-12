@@ -1,0 +1,58 @@
+/* ===== RideNova prototype: entry page and connected demo =====  Hand-written. */
+:root{
+  --bg:#EEF2F4; --surface:#FFFFFF; --ink:#14202A; --muted:#566878; --line:#D3DDE4;
+  --accent:#0B7A68; --accent-soft:#DCF1EB; --focus:#2F6FDB;
+  --sans:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; --mono:ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body.hub{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.hub-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#101C25;color:#E6EEF3;padding:10px 16px}
+.hub-bar nav{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.hub-bar nav a{color:#B8C7D2;text-decoration:none;padding:5px 10px;border-radius:6px}
+.hub-bar nav a:hover{background:#1C2C38;color:#fff}
+.hub-bar .rn-f{color:#B8C7D2}
+.hub-logo{color:#fff;text-decoration:none;font-weight:800;display:flex;align-items:center;gap:8px}
+.hub-logo i{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#19B394,#0B7A68);display:inline-block}
+.hub-title{font-weight:700;color:#9FE3D2}
+.hub-main{max-width:1180px;margin:0 auto;padding:28px 16px 40px;display:flex;flex-direction:column;gap:20px;width:100%}
+.hub-main h1{font-size:clamp(24px,4vw,36px);margin:0;line-height:1.15}
+.hub-lead{font-size:17px;color:var(--muted);max-width:75ch;margin:0}
+.hub-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.hub-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink)}
+.hub-card:hover{border-color:var(--accent)}
+.hub-card b{font-size:17px}
+.hub-card span{font-size:14px;color:var(--muted)}
+.hub-card .hub-meta{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.hub-panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.hub-panel h2{margin:0 0 6px;font-size:19px}
+.hub-panel p{margin:6px 0;max-width:80ch}
+.hub-note{font-size:13.5px;color:var(--muted)}
+.hub-btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:9px 14px;border-radius:9px;font-weight:700}
+.app-foot{font-size:12.5px;color:var(--muted);text-align:center;padding:10px 16px 18px}
+
+/* connected demo */
+.hub-warning{margin:10px 16px 0;background:#FCE8DD;color:#6E250A;border:1px solid #F0B9A2;border-radius:10px;padding:8px 12px}
+.hub-warning[hidden]{display:none}
+.hub-panes{flex:1;display:grid;gap:10px;padding:10px;grid-template-columns:repeat(3,minmax(0,1fr));min-height:0}
+.hub-panes[data-count="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+.hub-panes[data-count="2"] [data-pane="2"]{display:none}
+.hub-pane{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;min-height:78vh}
+.hub-pane-bar{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid var(--line);font-size:13px}
+.hub-pane-bar select{font:inherit;font-size:13px;padding:4px 6px;border:1px solid var(--line);border-radius:7px}
+.hub-pane iframe{flex:1;border:0;width:100%;min-height:72vh;background:var(--bg)}
+.hub-log{margin:0 10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.hub-log summary{cursor:pointer;color:var(--muted)}
+.hub-log ol{list-style:none;padding:0;margin:6px 0 0;font-size:12.5px;max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:3px}
+.hub-log time{font-family:var(--mono);color:var(--muted);margin-right:8px}
+@media (max-width:900px){
+  .hub-panes,.hub-panes[data-count="2"]{grid-template-columns:1fr}
+  .hub-pane{min-height:92vh}
+}
+.hub-controls{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.rn-f{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);font-weight:600}
+.rn-f select{font:inherit;font-size:13px;padding:4px 6px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+.rn-dbtn{font:inherit;font-size:13px;font-weight:600;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}

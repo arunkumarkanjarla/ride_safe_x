@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>D12 Rate rider · RideNova</title><link rel="stylesheet" href="../../assets/site.css"><link rel="stylesheet" href="../../assets/mock.css"><link rel="stylesheet" href="../../assets/css/prototype.css"><link rel="stylesheet" href="../../assets/css/generated/extracted.css"><script src="../../assets/brand.js" defer></script></head>
+<body>
+<header class="topnav"><div class="in"><a class="logo" href="../../index.html"><i></i><span class="brandname">RideNova</span> Blueprint</a><nav><a href="../../index.html" class="">Home</a><a href="../../architecture/index.html" class="">Architecture</a><a href="../../screens/rider/index.html" class="">Customer app</a><a href="../../screens/driver/index.html" class="on">Driver app</a><a href="../../screens/partner/index.html" class="">Partner app</a><a href="../../screens/admin/index.html" class="">Admin portal</a><a href="../../screens/support/index.html" class="">Support (design)</a><a href="../../flows/index.html" class="">User flows</a><a href="../../images/index.html" class="">Image gallery</a><a href="../../prototype/index.html" class="">Prototype</a></nav></div></header>
+<main class="page">
+<div class="head"><div class="crumbs"><a href="../../index.html">Home</a> / <a href="index.html">Driver & delivery app</a> / D12</div>
+<div class="eyebrow">Driver & delivery app · D12</div><h1>Rate rider</h1><p class="lead">Driver rates the rider; low ratings with a reason feed rider quality checks.</p></div>
+<div class="spec-open"><a class="rn-dbtn primary" href="../../../driver-app/index.html#/D12">Open D12 in the Driver & delivery app prototype</a>
+<span class="xs">The mock below is the approved design; the working screen is in the application.</span></div>
+<div class="screen-layout"><div class="mock-holder" id="mock"><div class="phone"><div class="scr"><div class="sb"><span>9:41</span><span class="isl"></span><span class="ico">5G <i></i></span></div><div class="ab"><span class="t"></span><span class="sub">Skip</span></div><div class="body center"><div class="av lg">AR</div><div class="h2">Rate Ananya</div><div class="stars"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.9 6.2.8-4.6 4.3 1.2 6.2L12 17.3 6.4 20.2l1.2-6.2L3 9.7l6.2-.8z" fill="currentColor"/></svg><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.9 6.2.8-4.6 4.3 1.2 6.2L12 17.3 6.4 20.2l1.2-6.2L3 9.7l6.2-.8z" fill="currentColor"/></svg><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.9 6.2.8-4.6 4.3 1.2 6.2L12 17.3 6.4 20.2l1.2-6.2L3 9.7l6.2-.8z" fill="currentColor"/></svg><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.9 6.2.8-4.6 4.3 1.2 6.2L12 17.3 6.4 20.2l1.2-6.2L3 9.7l6.2-.8z" fill="currentColor"/></svg><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.9 6.2.8-4.6 4.3 1.2 6.2L12 17.3 6.4 20.2l1.2-6.2L3 9.7l6.2-.8z" fill="currentColor"/></svg></div><div class="chips x-justify-content-center"><span class="chip on" role="button" tabindex="0" data-ui="toggle">Polite</span><span class="chip on" role="button" tabindex="0" data-ui="toggle">On time</span><span class="chip" role="button" tabindex="0" data-ui="toggle">Clear directions</span></div><div class="xs">Problem? Pick 1–3 stars to report behaviour, damage or safety issues.</div><div class="fill"></div><div class="x-width-100"><button class="btn rn-blk" type="button" data-do="x.rateRider" data-next="D06">Done</button></div></div></div></div></div>
+<div class="details">
+  <div class="grid2">
+    <div><h3>How it works</h3><ol class="steps"><li>Same component as the rider app with driver-side reasons.</li><li>A rider under 4.0 may see warnings; very low ratings go to review.</li><li>Returns the driver to online or offline, as before the trip.</li></ol></div>
+    <div><h3>What is on the screen</h3><ul class="clean"><li>Rider photo</li><li>Stars</li><li>Reason chips</li><li>Done and skip</li></ul></div>
+  </div>
+  <div><h3>Backend calls</h3><div class="tw"><table><thead><tr><th>Method</th><th>Endpoint / channel</th><th>Why</th></tr></thead><tbody><tr><td class="m"><span class="pill post">POST</span></td><td class="m">/v1/rides/{id}/rider-rating</td><td>Save rating</td></tr></tbody></table></div></div>
+  <div class="grid2">
+    <div><h3>Events published</h3><div><span class="pill ev">ride.rider_rated</span> </div></div>
+    <div><h3>Data used</h3><ul class="clean"><li>rides.ratings</li></ul></div>
+  </div>
+  <div><h3>Edge cases and validation</h3><ul class="clean"><li>Damage report asks for photos and opens a ticket.</li><li>Ratings are anonymous to the rider.</li></ul></div>
+  <div class="grid2">
+    <div><h3>Comes from</h3><div class="navlinks"><a href="../../screens/driver/D11-trip-complete.html">D11 · Trip complete & collect</a></div></div>
+    <div><h3>Goes to</h3><div class="navlinks"><a href="../../screens/driver/D06-online.html">D06 · Online & waiting</a></div></div>
+  </div>
+</div></div>
+<div class="pager"><a href="../../screens/driver/D11-trip-complete.html">← D11 Trip complete & collect</a><a href="../../screens/driver/D22-delivery-request.html">D22 Delivery request →</a></div>
+</main>
+</body></html>

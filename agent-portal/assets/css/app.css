@@ -1,0 +1,69 @@
+/* ===== RideNova applications: page layout =====
+   The screens use base.css (design system) and components.css (states, dialogs, fields); this file lays out the page. */
+:root{
+  --bg:#EEF2F4; --surface:#FFFFFF; --ink:#14202A; --muted:#566878; --line:#D3DDE4;
+  --accent:#0B7A68; --accent-soft:#DCF1EB; --focus:#2F6FDB;
+  --sans:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; --mono:ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+/* the page itself never scrolls: the application fills the window and only its content areas scroll */
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+a{color:var(--accent)}
+
+.rn-skip{position:absolute;left:-9999px;top:0;background:#fff;padding:8px 12px;z-index:200;border-radius:0 0 8px 0}
+.rn-skip:focus{left:0}
+.rn-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.app-stage{flex:1 1 auto;min-height:0;display:flex;justify-content:center;align-items:stretch;padding:12px;outline:none;overflow:hidden}
+.app-stage .rn-screen{width:100%;height:100%;display:flex;justify-content:center}
+.app-stage .rn-screen[hidden]{display:none}
+.app-stage .mock-holder{display:flex;justify-content:center;align-items:center;width:100%;height:100%;overflow:hidden}
+
+/* ---- phone applications: status bar and header on top, scrolling body, bottom navigation as footer ----
+   The device keeps its designed size (360 × 760) and app.js scales the whole device down to fit the window,
+   so the full screen stays visible at 100 % browser zoom instead of being cut and scrolled. */
+.app-stage .phone{height:760px;max-height:none}
+.app-stage .phone .scr{height:100%}
+.app-stage .phone .scr>.sb,.app-stage .phone .scr>.ab,.app-stage .phone .scr>.bnav{flex:0 0 auto}
+.app-stage .phone .body{min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.app-stage .phone .body>*{flex-shrink:0}
+.app-stage .phone .body>.fill{flex:1 1 0}
+.app-stage .phone .body>.rn-chatlog{flex:1 1 0;min-height:140px;overflow-y:auto}   /* chat: messages scroll, the reply box stays */
+.app-stage .phone .body.nopad{overflow:hidden}                                        /* map screens: the map stays, the sheet scrolls */
+.app-stage .phone .overlay{min-height:0}
+.app-stage .phone .overlay>*{flex-shrink:0}
+.app-stage .phone .overlay>.fill{flex:1 1 0}
+.app-stage .phone .overlay>.sheet{flex-shrink:1;min-height:96px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+
+/* ---- desktop applications (admin portal, support console): sidebar, header, scrolling body, footer ---- */
+body.rn-desk .app-stage{padding:0}
+.app-stage .desk{width:100%;min-width:1024px;height:100%;border:0;border-radius:0;box-shadow:none}
+.app-stage .desk .dsb{overflow-y:auto;scrollbar-width:thin}
+.app-stage .desk .dmain{min-width:0;min-height:0}
+.app-stage .desk .dtop{flex:0 0 auto}
+.app-stage .desk .dc{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain}
+.app-stage .desk .dc>*{flex-shrink:0}
+.app-stage .desk .dcard{overflow:auto}
+.dfoot{flex:0 0 auto;display:flex;align-items:center;gap:16px;height:36px;padding:0 20px;background:#fff;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.dfoot-sp{flex:1}
+.app-noscript{margin:16px;padding:12px;background:#FCE8DD;border-radius:10px}
+.rn-empty{color:var(--muted);font-size:13px;padding:12px;text-align:center}
+.rn-offline{margin:8px 16px 0}
+
+/* real select / textarea inside the drawn fields */
+.inp .box select.rn-input,.dfield .box select.rn-input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;color:inherit;height:100%;padding:0}
+.inp .box.rn-textarea,.dfield .box.rn-textarea{height:auto;min-height:64px;align-items:flex-start;padding-block:8px}
+.inp .box textarea.rn-input,.dfield .box textarea.rn-input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;color:inherit;resize:vertical;min-height:48px}
+.rn-chatlog{display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:100%}
+.rn-chatlog time{display:block;font-size:10.5px;opacity:.7;margin-top:2px}
+.rn-typing{opacity:.65;font-style:italic}
+
+/* phones: the device frame becomes the screen (no bezel) and fills the whole window */
+@media (max-width:480px){
+  .app-stage{padding:0}
+  .app-stage .phone{background:transparent;box-shadow:none;padding:0;border-radius:0;width:100%;height:100%;max-height:none}
+  .app-stage .phone .scr{width:100%;border-radius:0}
+  .app-stage .phone .scr > .sb{display:none}
+}

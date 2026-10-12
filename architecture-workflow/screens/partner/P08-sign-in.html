@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>P08 Partner sign-in · RideNova</title><link rel="stylesheet" href="../../assets/site.css"><link rel="stylesheet" href="../../assets/mock.css"><link rel="stylesheet" href="../../assets/css/prototype.css"><link rel="stylesheet" href="../../assets/css/generated/extracted.css"><script src="../../assets/brand.js" defer></script></head>
+<body>
+<header class="topnav"><div class="in"><a class="logo" href="../../index.html"><i></i><span class="brandname">RideNova</span> Blueprint</a><nav><a href="../../index.html" class="">Home</a><a href="../../architecture/index.html" class="">Architecture</a><a href="../../screens/rider/index.html" class="">Customer app</a><a href="../../screens/driver/index.html" class="">Driver app</a><a href="../../screens/partner/index.html" class="on">Partner app</a><a href="../../screens/admin/index.html" class="">Admin portal</a><a href="../../screens/support/index.html" class="">Support (design)</a><a href="../../flows/index.html" class="">User flows</a><a href="../../images/index.html" class="">Image gallery</a><a href="../../prototype/index.html" class="">Prototype</a></nav></div></header>
+<main class="page">
+<div class="head"><div class="crumbs"><a href="../../index.html">Home</a> / <a href="index.html">Partner app</a> / P08</div>
+<div class="eyebrow">Partner app · P08</div><h1>Partner sign-in</h1><p class="lead">Simulated sign-in for partner businesses. New in the static application phase.</p></div>
+<div class="spec-open"><a class="rn-dbtn primary" href="../../../patner-app/index.html#/P08">Open P08 in the Partner app prototype</a>
+<span class="xs">The mock below is the approved design; the working screen is in the application.</span></div>
+<div class="screen-layout"><div class="mock-holder" id="mock"><div class="phone"><div class="scr"><div class="sb"><span>9:41</span><span class="isl"></span><span class="ico">5G <i></i></span></div><div class="ab"><span class="t"></span></div><div class="body"><div class="h1">Partner sign-in</div><div class="sub">Restaurants, hotels, rental companies and bus operators.</div><div class="inp rn-field"><label for="in-P08-email">Business e-mail</label><div class="box"><input id="in-P08-email" name="email" class="rn-input" aria-describedby="in-P08-email-err" type="email" value="orders@biryanihouse.example" autocomplete="email" required></div><span class="rn-err" id="in-P08-email-err" data-err="email" hidden></span></div><div class="inp rn-field"><label for="in-P08-code">Verification code</label><div class="box"><input id="in-P08-code" name="code" class="rn-input" aria-describedby="in-P08-code-err" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6-digit code"></div><span class="rn-err" id="in-P08-code-err" data-err="code" hidden></span></div><div class="xs">Demo code 482716 · simulated e-mail, nothing is sent.</div><button class="btn rn-blk" type="button" data-do="x.partnerSignIn" data-next="P09">Sign in</button><div class="xs x-text-align-center">New partner? <b role="link" tabindex="0" data-go="P01" class="x-color-0b7a68">Apply to join</b></div><div class="fill"></div></div></div></div></div>
+<div class="details">
+  <div class="grid2">
+    <div><h3>How it works</h3><ol class="steps"><li>Enter the business e-mail and the 6-digit code.</li><li>Valid input signs in and opens the partner home (P09).</li><li>Apply to join opens onboarding (P01).</li></ol></div>
+    <div><h3>What is on the screen</h3><ul class="clean"><li>Business e-mail</li><li>Verification code</li><li>Sign in</li><li>Apply to join</li></ul></div>
+  </div>
+  <div><h3>Backend calls</h3><div class="tw"><table><thead><tr><th>Method</th><th>Endpoint / channel</th><th>Why</th></tr></thead><tbody><tr><td class="m"><span class="pill post">POST</span></td><td class="m">/v1/partners/auth/otp</td><td>Send code (future)</td></tr><tr><td class="m"><span class="pill post">POST</span></td><td class="m">/v1/partners/auth/verify</td><td>Verify (future)</td></tr></tbody></table></div></div>
+  <div class="grid2">
+    <div><h3>Events published</h3><div><span class="xs">None</span></div></div>
+    <div><h3>Data used</h3><ul class="clean"><li>Nothing stored</li></ul></div>
+  </div>
+  <div><h3>Edge cases and validation</h3><ul class="clean"><li>Invalid e-mail or code shows inline errors.</li><li>The prototype never authenticates anyone.</li></ul></div>
+  <div class="grid2">
+    <div><h3>Comes from</h3><div class="navlinks"><a href="../../screens/partner/P10-settings.html">P10 · Business profile & settings</a></div></div>
+    <div><h3>Goes to</h3><div class="navlinks"><a href="../../screens/partner/P09-home.html">P09 · Partner home</a><a href="../../screens/partner/P01-onboarding.html">P01 · Partner onboarding</a></div></div>
+  </div>
+</div></div>
+<div class="pager"><span></span><a href="../../screens/partner/P01-onboarding.html">P01 Partner onboarding →</a></div>
+</main>
+</body></html>

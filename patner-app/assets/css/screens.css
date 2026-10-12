@@ -1,0 +1,49 @@
+/* Layout details used by the Partner app screens. */
+.x-align-items-center{align-items:center !important}
+.x-background-0b7a68{background:#0B7A68 !important}
+.x-background-c3ccd3{background:#C3CCD3 !important}
+.x-background-f2a516{background:#F2A516 !important}
+.x-background-f5f7f8{background:#F5F7F8 !important}
+.x-background-fff9ec{background:#FFF9EC !important}
+.x-border-2px-solid-f2a516{border:2px solid #F2A516 !important}
+.x-border-radius-4px{border-radius:4px !important}
+.x-bottom-0{bottom:0 !important}
+.x-color-0b7a68{color:#0B7A68 !important}
+.x-color-8796a2{color:#8796A2 !important}
+.x-color-a56a00{color:#A56A00 !important}
+.x-display-grid{display:grid !important}
+.x-flex-direction-row{flex-direction:row !important}
+.x-font-size-11px{font-size:11px !important}
+.x-font-size-12-5px{font-size:12.5px !important}
+.x-font-size-13px{font-size:13px !important}
+.x-font-size-20px{font-size:20px !important}
+.x-font-weight-700{font-weight:700 !important}
+.x-font-weight-800{font-weight:800 !important}
+.x-gap-10px{gap:10px !important}
+.x-gap-4px{gap:4px !important}
+.x-gap-8px{gap:8px !important}
+.x-gap-9px{gap:9px !important}
+.x-grid-template-columns-110px-1fr{grid-template-columns:110px 1fr !important}
+.x-grid-template-columns-repeat-7-1fr{grid-template-columns:repeat(7,1fr) !important}
+.x-height-16px{height:16px !important}
+.x-justify-content-space-between{justify-content:space-between !important}
+.x-left-0{left:0% !important}
+.x-left-10{left:10% !important}
+.x-left-20{left:20% !important}
+.x-left-45{left:45% !important}
+.x-left-55{left:55% !important}
+.x-left-60{left:60% !important}
+.x-letter-spacing-06em{letter-spacing:.06em !important}
+.x-position-absolute{position:absolute !important}
+.x-position-relative{position:relative !important}
+.x-text-align-center{text-align:center !important}
+.x-top-0{top:0 !important}
+.x-width-100{width:100% !important}
+.x-width-30{width:30% !important}
+.x-width-35{width:35% !important}
+.x-width-40{width:40% !important}
+.x-width-45{width:45% !important}
+.x-width-60{width:60% !important}
+.xb-0b7e9861{border:1px solid #E3E8EC !important;border-radius:8px !important;padding:5px 0 !important;background:#FDE6E0 !important}
+.xb-3a5dc2f6{border:1px solid #E3E8EC !important;border-radius:8px !important;padding:5px 0 !important;background:#FDF1D8 !important}
+.xb-e13b6927{border:1px solid #E3E8EC !important;border-radius:8px !important;padding:5px 0 !important;background:#DCF3EC !important}

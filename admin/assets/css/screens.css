@@ -1,0 +1,118 @@
+/* Layout details used by the Admin portal screens. */
+.x-align-items-center{align-items:center !important}
+.x-align-self-flex-end{align-self:flex-end !important}
+.x-background-0b7a68{background:#0B7A68 !important}
+.x-background-b7791f{background:#B7791F !important}
+.x-background-d0381c{background:#D0381C !important}
+.x-background-d4dce2{background:#D4DCE2 !important}
+.x-background-dcf3ec{background:#DCF3EC !important}
+.x-background-e1e7ec{background:#E1E7EC !important}
+.x-background-e4ecfa{background:#E4ECFA !important}
+.x-background-f4f6f8{background:#F4F6F8 !important}
+.x-background-fbf0d9{background:#FBF0D9 !important}
+.x-background-fce6df{background:#FCE6DF !important}
+.x-background-fff{background:#fff !important}
+.x-background-linear-gradien-195684{background:linear-gradient(150deg,#0B7A68,#0A3F38) !important}
+.x-border-radius-10px{border-radius:10px !important}
+.x-border-radius-3px{border-radius:3px !important}
+.x-border-radius-4px{border-radius:4px !important}
+.x-border-radius-50{border-radius:50% !important}
+.x-border-radius-8px{border-radius:8px !important}
+.x-border-radius-9px{border-radius:9px !important}
+.x-border-top-1px-solid-e1e7ec{border-top:1px solid #E1E7EC !important}
+.x-color-075a4d{color:#075A4D !important}
+.x-color-1f4e9e{color:#1F4E9E !important}
+.x-color-667685{color:#667685 !important}
+.x-color-6b4600{color:#6B4600 !important}
+.x-color-9aa7b2{color:#9AA7B2 !important}
+.x-color-fff{color:#fff !important}
+.x-display-block{display:block !important}
+.x-display-flex{display:flex !important}
+.x-display-grid{display:grid !important}
+.x-display-inline-block{display:inline-block !important}
+.x-flex-1{flex:1 !important}
+.x-flex-direction-column{flex-direction:column !important}
+.x-flex-wrap-wrap{flex-wrap:wrap !important}
+.x-font-family-ui-monospace-c-95c7c0{font-family:ui-monospace,Consolas,monospace !important}
+.x-font-size-11px{font-size:11px !important}
+.x-font-size-12-5px{font-size:12.5px !important}
+.x-font-size-12px{font-size:12px !important}
+.x-font-size-13px{font-size:13px !important}
+.x-font-size-14px{font-size:14px !important}
+.x-font-size-22px{font-size:22px !important}
+.x-font-size-26px{font-size:26px !important}
+.x-font-size-30px{font-size:30px !important}
+.x-font-weight-800{font-weight:800 !important}
+.x-gap-10px{gap:10px !important}
+.x-gap-14px{gap:14px !important}
+.x-gap-6px{gap:6px !important}
+.x-gap-8px{gap:8px !important}
+.x-grid-template-columns-0-75fr-1-4fr{grid-template-columns:0.75fr 1.4fr !important}
+.x-grid-template-columns-1-1fr-1fr-1fr{grid-template-columns:1.1fr 1fr 1fr !important}
+.x-grid-template-columns-1-2fr-1fr{grid-template-columns:1.2fr 1fr !important}
+.x-grid-template-columns-1-35fr-1fr{grid-template-columns:1.35fr 1fr !important}
+.x-grid-template-columns-1-3fr-1fr{grid-template-columns:1.3fr 1fr !important}
+.x-grid-template-columns-1-4fr-1fr{grid-template-columns:1.4fr 1fr !important}
+.x-grid-template-columns-1-5fr-1fr{grid-template-columns:1.5fr 1fr !important}
+.x-grid-template-columns-1-65fr-1fr{grid-template-columns:1.65fr 1fr !important}
+.x-grid-template-columns-1fr-1-2fr{grid-template-columns:1fr 1.2fr !important}
+.x-grid-template-columns-1fr-1fr{grid-template-columns:1fr 1fr !important}
+.x-height-100{height:100% !important}
+.x-height-14px{height:14px !important}
+.x-height-20px{height:20px !important}
+.x-height-34px{height:34px !important}
+.x-height-390px{height:390px !important}
+.x-height-42px{height:42px !important}
+.x-height-470px{height:470px !important}
+.x-height-560px{height:560px !important}
+.x-height-640px{height:640px !important}
+.x-height-6px{height:6px !important}
+.x-height-8px{height:8px !important}
+.x-justify-content-center{justify-content:center !important}
+.x-justify-content-space-between{justify-content:space-between !important}
+.x-left-17px{left:17px !important}
+.x-left-3px{left:3px !important}
+.x-line-height-1-15{line-height:1.15 !important}
+.x-margin-0{margin:0 !important}
+.x-margin-left-14px{margin-left:14px !important}
+.x-margin-left-auto{margin-left:auto !important}
+.x-margin-top-auto{margin-top:auto !important}
+.x-max-width-420px{max-width:420px !important}
+.x-max-width-80{max-width:80% !important}
+.x-min-height-0{min-height:0 !important}
+.x-opacity-8{opacity:.8 !important}
+.x-overflow-hidden{overflow:hidden !important}
+.x-padding-10px{padding:10px !important}
+.x-padding-48px{padding:48px !important}
+.x-padding-5px-10px{padding:5px 10px !important}
+.x-padding-8px-10px{padding:8px 10px !important}
+.x-padding-9px-12px{padding:9px 12px !important}
+.x-padding-top-12px{padding-top:12px !important}
+.x-position-absolute{position:absolute !important}
+.x-position-relative{position:relative !important}
+.x-top-3px{top:3px !important}
+.x-vertical-align-middle{vertical-align:middle !important}
+.x-white-space-pre-wrap{white-space:pre-wrap !important}
+.x-width-14px{width:14px !important}
+.x-width-250px{width:250px !important}
+.x-width-260px{width:260px !important}
+.x-width-280px{width:280px !important}
+.x-width-300px{width:300px !important}
+.x-width-320px{width:320px !important}
+.x-width-330px{width:330px !important}
+.x-width-340px{width:340px !important}
+.x-width-34px{width:34px !important}
+.x-width-360px{width:360px !important}
+.x-width-380px{width:380px !important}
+.x-width-400px{width:400px !important}
+.x-width-41{width:41% !important}
+.x-width-430px{width:430px !important}
+.x-width-58{width:58% !important}
+.x-width-70{width:70% !important}
+.x-width-80px{width:80px !important}
+.x-width-81{width:81% !important}
+.x-width-92{width:92% !important}
+.xb-4f6b3491{width:48px !important;height:54px !important;border:1.5px solid #0B7A68 !important;border-radius:10px !important;display:flex !important;align-items:center !important;justify-content:center !important;font-size:22px !important;font-weight:700 !important}
+.xb-81fd1163{display:flex !important;gap:10px !important;align-items:center !important;padding:10px 12px !important;background:#fff !important;border:1px solid #E3E8EC !important;border-radius:12px !important;font-size:12.5px !important}
+.xb-a4f4eaef{width:16px !important;height:16px !important;border:1.5px solid #C3CCD3 !important;border-radius:4px !important}
+.xb-ac8cf682{width:48px !important;height:54px !important;border:1.5px solid #E1E7EC !important;border-radius:10px !important;display:flex !important;align-items:center !important;justify-content:center !important;font-size:22px !important;font-weight:700 !important}

@@ -1,0 +1,131 @@
+/* ===== RideNova static prototype: interaction layer =====
+   Hand-written. Loaded after mock.css on screen pages and on the demo console.
+   Zero-specificity resets (:where) never override the approved mock styles. */
+:root{--rn-focus:#2F6FDB;--rn-sim:#6B4FB3;--rn-err:#C2410C;--rn-ok:#0B7A68;--rn-warn:#A8690F}
+
+/* --- controls inside the mocks look exactly like the approved design */
+:where(.phone,.desk) :where(button){font:inherit;color:inherit;margin:0;padding:0;border:0;background:none;text-align:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+/* same specificity as site.css "a{color:…}" but later, so it wins there; any class rule in mock.css still wins */
+:where(.phone,.desk) a{color:inherit;text-decoration:none}
+:where(.phone,.desk) :where(button.rn-blk){width:100%}
+:where(.phone,.desk) :where([role="button"],[role="switch"],[role="radio"],a[href],button,[data-key]){cursor:pointer}
+.phone :focus-visible,.desk :focus-visible{outline:3px solid var(--rn-focus);outline-offset:2px;border-radius:10px}
+.desk .dsb a:focus-visible{outline-offset:-2px}
+[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.rn-busy{opacity:.7;cursor:progress}
+.rn-hidden{display:none!important}
+button:disabled{opacity:.5;cursor:not-allowed}
+
+/* real inputs inside the drawn fields */
+.inp .box .rn-input,.dfield .box .rn-input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;color:inherit;padding:0;height:100%}
+.inp .box:focus-within,.dfield .box:focus-within{border-color:var(--brand,#0B7A68);box-shadow:0 0 0 3px rgba(47,111,219,.25)}
+.rn-input[aria-invalid="true"]{color:var(--rn-err)}
+.rn-field:has([aria-invalid="true"]) .box{border-color:var(--rn-err)}
+.rn-err{display:block;color:var(--rn-err);font-size:12px;font-weight:600;margin-top:2px}
+.rn-err[hidden]{display:none}
+.rn-otp{position:relative}
+.rn-otp-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;font-size:16px;cursor:text}
+.rn-otp:focus-within{outline:3px solid var(--rn-focus);outline-offset:4px;border-radius:12px}
+.rn-otp:has([aria-invalid="true"]) > span{border-color:var(--rn-err)}
+.stars .rn-star-off{opacity:.25}
+.steps-m .s.rn-pending{opacity:.55}
+.rn-holding{animation:rn-hold var(--rn-hold,2s) linear forwards}
+@keyframes rn-hold{from{box-shadow:0 0 0 0 rgba(217,58,30,.6)}to{box-shadow:0 0 0 22px rgba(217,58,30,0)}}
+.dc.rn-denied > *:not(.rn-state){filter:blur(5px);pointer-events:none;user-select:none}
+tr.rn-live td{background:#FFF8E6}
+
+/* --- state panel injected into a mock for states the approved screen does not draw */
+.rn-state{position:absolute;left:12px;right:12px;top:44px;z-index:30;display:flex;flex-direction:column;gap:4px;background:#fff;border:1.5px solid #B5C8EC;border-left:5px solid var(--rn-focus);border-radius:14px;padding:10px 12px;box-shadow:0 10px 26px rgba(12,19,24,.22);font-size:12.5px;line-height:1.35;color:#14202A}
+.desk .rn-state{position:static;margin-bottom:10px}
+.desk .dc{position:relative}
+.rn-state b{font-size:13.5px}
+.rn-state span{color:#566878}
+.rn-state.err{border-left-color:var(--rn-err);border-color:#F0B9A2}
+.rn-state.warn{border-left-color:var(--rn-warn);border-color:#E8CF9E}
+.rn-state.ok{border-left-color:var(--rn-ok);border-color:#9FD3C5}
+.rn-state-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.rn-sbtn{font:inherit;font-size:12.5px;font-weight:700;padding:7px 11px;border-radius:9px;border:1.5px solid #CBD5DD;background:#fff;color:#14202A;cursor:pointer}
+.rn-sbtn.primary{background:#0B7A68;border-color:#0B7A68;color:#fff}
+.rn-sbtn:focus-visible{outline:3px solid var(--rn-focus);outline-offset:2px}
+
+/* --- demo bar */
+.rn-demobar{background:#fff;border:1px solid var(--line);border-left:5px solid var(--rn-sim);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.rn-db-row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.rn-badge{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--rn-sim);border-radius:6px;padding:3px 8px}
+.rn-f{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);font-weight:600}
+.rn-f.block{display:flex;flex-direction:column;align-items:stretch}
+.rn-f select,.rn-f input{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);max-width:100%}
+.rn-dbtn{font:inherit;font-size:13px;font-weight:600;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.rn-dbtn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.rn-dbtn:hover{border-color:var(--accent)}
+.rn-dbtn:focus-visible,.rn-f select:focus-visible{outline:3px solid var(--rn-focus);outline-offset:2px}
+.rn-db-state{font-size:13px;color:var(--ink);font-family:var(--mono);margin:0;max-width:none}
+.rn-db-log summary{cursor:pointer;font-size:13px;color:var(--muted)}
+.rn-db-log ol{margin:6px 0 0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:3px;font-size:12.5px;max-height:240px;overflow:auto}
+.rn-db-log time{font-family:var(--mono);color:var(--muted);margin-right:8px}
+.rn-db-log code{margin-right:6px}
+.rn-offline{background:#FCE8DD;color:#6E250A;border:1px solid #F0B9A2;border-radius:10px;padding:8px 12px;font-size:13.5px;font-weight:600}
+.rn-offline[hidden]{display:none}
+
+/* --- toasts and dialogs */
+.rn-toasts{position:fixed;right:16px;bottom:16px;z-index:100;display:flex;flex-direction:column;gap:8px;max-width:min(420px,calc(100vw - 32px))}
+.rn-toast{background:#14202A;color:#fff;border-radius:10px;padding:10px 14px;font-size:13.5px;box-shadow:0 10px 24px rgba(0,0,0,.25);transition:opacity .4s}
+.rn-toast.error{background:#8F2D0A}
+.rn-toast.warn{background:#6E4A0A}
+.rn-toast.sim{background:#3A2A66}
+.rn-toast.out{opacity:0}
+.rn-dialog{border:1px solid var(--line);border-radius:14px;padding:18px 20px;max-width:min(440px,calc(100vw - 32px));font-family:var(--sans);color:var(--ink)}
+.rn-dialog::backdrop{background:rgba(12,19,24,.45)}
+.rn-dialog p{margin:0 0 12px}
+.rn-dialog-row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+
+/* --- app view: hide the specification, centre the device */
+body.rn-appview .details,body.rn-appview .pager,body.rn-appview main.page > .head{display:none}
+body.rn-appview .screen-layout{grid-template-columns:1fr}
+body.rn-appview .mock-holder{justify-content:center}
+body.rn-is-offline .mock-holder{filter:saturate(.75)}
+
+/* --- responsive: the mock is scaled to fit by rn-ui.js (CSS zoom); keep the page from scrolling sideways */
+.mock-holder{max-width:100%}
+.rn-db-toggle{display:none}
+@media (max-width:720px){
+  .page{padding-inline:12px;gap:22px}
+  .rn-db-toggle{display:inline-flex}
+  .rn-demobar:not(.open) .rn-db-row > :not(.rn-badge):not(.rn-db-toggle),.rn-demobar:not(.open) .rn-db-log{display:none}
+  body.rn-appview .topnav nav{display:none}
+  body.rn-appview .page{padding-block-start:12px}
+  .rn-demobar{padding:8px 10px}
+  .rn-db-row{gap:6px 8px}
+  .rn-f{font-size:12px}
+  .rn-db-state{font-size:12px}
+}
+@media (prefers-reduced-motion:reduce){.rn-holding{animation:none;outline:4px solid #D93A1E}.rn-toast{transition:none}}
+
+/* --- demo console page */
+.rn-console{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:980px){.rn-console{grid-template-columns:1fr}}
+.rn-scen{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.rn-scen article{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.rn-scen article.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.rn-scen h3{font-size:15px}
+.rn-scen ol{margin:0;padding-left:18px;font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+.rn-scen .rn-row{display:flex;flex-wrap:wrap;gap:6px}
+.rn-kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;font-size:13.5px}
+.rn-kv dt{color:var(--muted)}
+.rn-kv dd{margin:0;font-family:var(--mono);font-size:12.5px;overflow-wrap:anywhere}
+.rn-events{max-height:420px;overflow:auto}
+.rn-events table td{font-size:12.5px;padding:5px 9px}
+
+/* --- static application phase */
+.spec-open{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.spec-open .xs{font-size:13px;color:var(--muted)}
+.rn-note{background:#FFF8E6;border-left:3px solid #A8690F;padding:2px 6px;border-radius:4px}
+.rn-row-link{cursor:pointer}
+.rn-row-link:hover td{background:#F4F8F7}
+.rn-row-link:focus-visible{outline:3px solid var(--rn-focus);outline-offset:-3px}
+.desk .dcard > div{overflow:auto}
+.dt th[role="button"]{cursor:pointer}
+.dt th[aria-sort="ascending"]::after{content:" ▲"}
+.dt th[aria-sort="descending"]::after{content:" ▼"}
+.dtop .srch .rn-search{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;color:var(--ink,#14202A);padding:0}
+.dtop .srch:focus-within{border-color:var(--brand,#0B7A68);box-shadow:0 0 0 3px rgba(47,111,219,.25)}

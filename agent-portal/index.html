@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>RideNova Agent portal</title><link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/css/base.css"><link rel="stylesheet" href="assets/css/components.css"><link rel="stylesheet" href="assets/css/app.css"><link rel="stylesheet" href="assets/css/agent.css"><script src="assets/js/config.js" defer></script><script src="assets/js/agent-policy.js" defer></script><script src="assets/js/agent-sync.js" defer></script><script src="assets/js/agent-data.js" defer></script><script src="assets/js/agent-app.js" defer></script></head>
+<body class="rn-desk ag" data-app="agent">
+<a class="rn-skip" href="#app-stage">Skip to content</a>
+<div class="rn-toasts" data-rn="toasts" aria-live="polite"></div>
+<main id="app-stage" class="app-stage" tabindex="-1">
+
+<!-- G01 · sign-in (accounts are created and managed in the admin portal) -->
+<section class="desk ag-login" data-view="login" data-route="G01" aria-label="Agent sign-in" hidden>
+  <div class="ag-login-brand">
+    <div class="ag-login-logo"><i></i><span class="brandname">RideNova</span></div>
+    <h1>Agent portal</h1>
+    <p>One web workspace for every support contact: phone calls, e-mail, social media and in-app chat from customers, drivers and partners.</p>
+    <ul class="ag-login-list">
+      <li>Calls with masked numbers, hold, transfer and wrap-up</li>
+      <li>Shared e-mail inbox with approved templates</li>
+      <li>WhatsApp, Facebook, Instagram and X in one queue</li>
+      <li>Accounts, roles, channels and limits are controlled by the admin portal</li>
+    </ul>
+  </div>
+  <div class="ag-login-form">
+    <form class="ag-login-box" data-form="signin" novalidate>
+      <h2>Agent sign-in</h2>
+      <div class="dfield rn-field"><label for="ag-agent">Agent account</label><div class="box"><select id="ag-agent" name="agent" class="rn-input" aria-describedby="ag-agent-err"></select></div><span class="rn-err" id="ag-agent-err" data-err="agent" hidden></span></div>
+      <div class="dfield rn-field"><label for="ag-code">Sign-in code</label><div class="box"><input id="ag-code" name="code" class="rn-input" type="password" inputmode="numeric" maxlength="6" placeholder="6-digit code" autocomplete="one-time-code" aria-describedby="ag-code-err"></div><span class="rn-err" id="ag-code-err" data-err="code" hidden></span></div>
+      <button class="dbtn ag-wide" type="submit">Sign in</button>
+      <p class="ag-muted">Demo code <b data-bind="democode">246810</b>. Simulated sign-in: no real account and no real customer data. New agents, roles and suspensions are handled by an administrator in the admin portal (Agent portal control).</p>
+      <p class="ag-muted" data-bind="policy-line"></p>
+    </form>
+  </div>
+</section>
+
+<!-- signed-in workspace -->
+<div class="desk" data-view="desk" hidden>
+  <nav class="dsb" aria-label="Agent portal sections">
+    <div class="lg"><i></i><span class="brandname">RideNova</span> Agents</div>
+    <div class="grp">WORK</div>
+    <a href="#/G02" data-route="G02"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Home</a>
+    <a href="#/G03" data-route="G03"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13l2-8h12l2 8v6H4z"/><path d="M4 13h5l1 2h4l1-2h5"/></svg>Unified inbox<span class="cnt" data-count="all" hidden></span></a>
+    <a href="#/G08" data-route="G08"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Case workspace</a>
+    <div class="grp">CHANNELS</div>
+    <a href="#/G04" data-route="G04" data-ch="call"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>Calls<span class="cnt" data-count="call" hidden></span></a>
+    <a href="#/G05" data-route="G05" data-ch="email"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>E-mail<span class="cnt" data-count="email" hidden></span></a>
+    <a href="#/G06" data-route="G06" data-ch="social"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 10.8l7.4-3.6M8.3 13.2l7.4 3.6"/></svg>Social media<span class="cnt" data-count="social" hidden></span></a>
+    <a href="#/G07" data-route="G07" data-ch="chat"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Live chat &amp; in-app<span class="cnt" data-count="chat" hidden></span></a>
+    <div class="grp">PEOPLE &amp; KNOWLEDGE</div>
+    <a href="#/G09" data-route="G09"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.3-5.5 6.5-5.5s5.7 2 6.5 5.5"/><circle cx="17" cy="9" r="2.8"/><path d="M16 14.6c2.7.2 4.6 2 5.3 4.9"/></svg>Contacts</a>
+    <a href="#/G10" data-route="G10"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/></svg>Knowledge &amp; templates</a>
+    <div class="grp">ME</div>
+    <a href="#/G11" data-route="G11"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg>My performance</a>
+    <a href="#/G12" data-route="G12" data-perm="team"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>Team board</a>
+    <a href="#/G13" data-route="G13"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>My access (admin)</a>
+    <a href="#/G01" data-act="signout"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/></svg>Sign out</a>
+  </nav>
+  <div class="dmain">
+    <header class="dtop">
+      <span class="ttl" data-bind="title">Home</span>
+      <label class="ag-status"><span class="rn-vh">My status</span><i class="ag-dot" data-bind="status-dot"></i><select data-bind="status" aria-label="My status"><option value="AVAILABLE">Available</option><option value="BREAK">On break</option><option value="TRAINING">Training / meeting</option><option value="AWAY">Away</option></select></label>
+      <span class="ag-busy" data-bind="busy" hidden></span>
+      <span class="srch"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input type="search" class="rn-input rn-search" data-bind="search" placeholder="Search cases, people, IDs" aria-label="Search cases, people and IDs"></span>
+      <span class="me"><span class="av" data-bind="initials">AG</span><span class="ag-me"><b data-bind="name">Agent</b><span data-bind="role">Agent</span></span></span>
+    </header>
+    <div class="ag-callbar" data-bind="callbar" role="region" aria-label="Current call" hidden></div>
+    <div class="ag-banner" data-bind="banner" role="status" hidden></div>
+    <div class="dc" data-bind="page" tabindex="-1"></div>
+    <footer class="dfoot"><span>© 2026 <span class="brandname">RideNova</span> · Agent portal</span><span class="dfoot-sp"></span><span data-bind="policy">Policy v1</span><span data-bind="link">Admin link</span><span>Synthetic data · this browser tab only</span></footer>
+  </div>
+</div>
+
+</main>
+<noscript><p class="app-noscript">Please enable JavaScript to use this application.</p></noscript>
+</body></html>

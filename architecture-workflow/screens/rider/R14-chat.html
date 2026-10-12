@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>R14 In-ride chat · RideNova</title><link rel="stylesheet" href="../../assets/site.css"><link rel="stylesheet" href="../../assets/mock.css"><link rel="stylesheet" href="../../assets/css/prototype.css"><link rel="stylesheet" href="../../assets/css/generated/extracted.css"><script src="../../assets/brand.js" defer></script></head>
+<body>
+<header class="topnav"><div class="in"><a class="logo" href="../../index.html"><i></i><span class="brandname">RideNova</span> Blueprint</a><nav><a href="../../index.html" class="">Home</a><a href="../../architecture/index.html" class="">Architecture</a><a href="../../screens/rider/index.html" class="on">Customer app</a><a href="../../screens/driver/index.html" class="">Driver app</a><a href="../../screens/partner/index.html" class="">Partner app</a><a href="../../screens/admin/index.html" class="">Admin portal</a><a href="../../screens/support/index.html" class="">Support (design)</a><a href="../../flows/index.html" class="">User flows</a><a href="../../images/index.html" class="">Image gallery</a><a href="../../prototype/index.html" class="">Prototype</a></nav></div></header>
+<main class="page">
+<div class="head"><div class="crumbs"><a href="../../index.html">Home</a> / <a href="index.html">Customer app</a> / R14</div>
+<div class="eyebrow">Customer app · R14</div><h1>In-ride chat</h1><p class="lead">Text chat between rider and driver during pickup, with quick replies that are translated automatically.</p></div>
+<div class="spec-open"><a class="rn-dbtn primary" href="../../../customer-app/index.html#/R14">Open R14 in the Customer app prototype</a>
+<span class="xs">The mock below is the approved design; the working screen is in the application.</span></div>
+<div class="screen-layout"><div class="mock-holder" id="mock"><div class="phone"><div class="scr"><div class="sb"><span>9:41</span><span class="isl"></span><span class="ico">5G <i></i></span></div><div class="ab"><button class="ib" type="button" aria-label="Back" data-back data-back-to="R12-driver-assigned.html"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="t">Arjun K. <span class="xs x-font-weight-400 x-display-block">Swift Dzire · TS 09 EA 4521</span></span><a class="ib" href="R13-masked-call.html" data-go="R13" aria-label="Call (masked)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></a></div><div class="body x-gap-8px"><div class="bubble sys">Messages are kept for 7 days for your safety</div><div class="bubble them">Hi, I'm at Gate 2. White Dzire.</div><div class="bubble me">Coming in 2 minutes</div><div class="bubble them">OK, waiting 👍</div><div class="fill"></div><div class="chips"><span class="chip" role="button" tabindex="0" data-do="x.quickReply">I'm on my way</span><span class="chip" role="button" tabindex="0" data-do="x.quickReply">Please wait</span><span class="chip" role="button" tabindex="0" data-do="x.quickReply">Call me</span></div><div class="x-display-flex x-gap-8px x-align-items-center"><div class="inp x-flex-1"><div class="box"><span class="ph">Message</span></div></div><span class="ic brand x-width-46px x-height-46px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l16-8-6 16-2.5-6.5z"/></svg></span></div></div></div></div></div>
+<div class="details">
+  <div class="grid2">
+    <div><h3>How it works</h3><ol class="steps"><li>Messages go over the ride WebSocket and are stored by the Support service.</li><li>Quick replies are pre-translated, so a rider and driver who speak different languages still understand each other.</li><li>Driver sees messages read aloud while driving.</li></ol></div>
+    <div><h3>What is on the screen</h3><ul class="clean"><li>Driver header with call button</li><li>Retention notice</li><li>Message bubbles</li><li>Quick replies</li><li>Message box</li></ul></div>
+  </div>
+  <div><h3>Backend calls</h3><div class="tw"><table><thead><tr><th>Method</th><th>Endpoint / channel</th><th>Why</th></tr></thead><tbody><tr><td class="m"><span class="pill ws">WS</span></td><td class="m">/ws/chat/{ride_id}</td><td>Send and receive messages</td></tr><tr><td class="m"><span class="pill get">GET</span></td><td class="m">/v1/rides/{id}/messages</td><td>History</td></tr></tbody></table></div></div>
+  <div class="grid2">
+    <div><h3>Events published</h3><div><span class="pill ev">chat.message_sent</span> </div></div>
+    <div><h3>Data used</h3><ul class="clean"><li>support.messages</li></ul></div>
+  </div>
+  <div><h3>Edge cases and validation</h3><ul class="clean"><li>Phone numbers, links and abusive words are masked and can trigger a safety review.</li><li>Chat closes 30 minutes after the trip.</li></ul></div>
+  <div class="grid2">
+    <div><h3>Comes from</h3><div class="navlinks"><a href="../../screens/rider/R12-driver-assigned.html">R12 · Driver assigned</a><a href="../../screens/rider/R15-trip-in-progress.html">R15 · Trip in progress</a></div></div>
+    <div><h3>Goes to</h3><div class="navlinks"><a href="../../screens/rider/R12-driver-assigned.html">R12 · Driver assigned</a><a href="../../screens/rider/R13-masked-call.html">R13 · Masked call</a></div></div>
+  </div>
+</div></div>
+<div class="pager"><a href="../../screens/rider/R13-masked-call.html">← R13 Masked call</a><a href="../../screens/rider/R15-trip-in-progress.html">R15 Trip in progress →</a></div>
+</main>
+</body></html>

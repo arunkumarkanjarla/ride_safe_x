@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>S20 Agent sign-in · RideNova</title><link rel="stylesheet" href="../../assets/site.css"><link rel="stylesheet" href="../../assets/mock.css"><link rel="stylesheet" href="../../assets/css/prototype.css"><link rel="stylesheet" href="../../assets/css/generated/extracted.css"><script src="../../assets/brand.js" defer></script></head>
+<body>
+<header class="topnav"><div class="in"><a class="logo" href="../../index.html"><i></i><span class="brandname">RideNova</span> Blueprint</a><nav><a href="../../index.html" class="">Home</a><a href="../../architecture/index.html" class="">Architecture</a><a href="../../screens/rider/index.html" class="">Customer app</a><a href="../../screens/driver/index.html" class="">Driver app</a><a href="../../screens/partner/index.html" class="">Partner app</a><a href="../../screens/admin/index.html" class="">Admin portal</a><a href="../../screens/support/index.html" class="on">Support (design)</a><a href="../../flows/index.html" class="">User flows</a><a href="../../images/index.html" class="">Image gallery</a><a href="../../prototype/index.html" class="">Prototype</a></nav></div></header>
+<main class="page">
+<div class="head"><div class="crumbs"><a href="../../index.html">Home</a> / <a href="index.html">Support (design)</a> / S20</div>
+<div class="eyebrow">Support (design) · S20</div><h1>Agent sign-in</h1><p class="lead">Agent sign-in for the support console (simulated). New application.</p></div>
+<div class="spec-open"><a class="rn-dbtn primary" href="../../../agent-portal/index.html#/S20">Open S20 in the Support (design) prototype</a>
+<span class="xs">The mock below is the approved design; the working screen is in the application.</span></div>
+<div class="screen-layout"><div class="mock-holder" id="mock"><div class="desk x-grid-template-columns-1fr-1fr"><div class="x-background-linear-gradien-677408 x-color-fff x-padding-48px x-display-flex x-flex-direction-column x-gap-14px x-justify-content-center"><div class="x-display-flex x-align-items-center x-gap-10px x-font-size-26px x-font-weight-800"><i class="x-width-34px x-height-34px x-border-radius-9px x-background-fff x-display-inline-block"></i><span class="brandname">RideNova</span></div><div class="x-font-size-30px x-font-weight-800 x-line-height-1-15 x-max-width-420px">Support console</div><div class="x-opacity-8 x-max-width-420px">Chats, call-backs and tickets from customers, drivers and partners. Demo workspace with synthetic data.</div></div><div class="x-background-fff x-display-flex x-align-items-center x-justify-content-center"><div class="x-width-360px x-display-flex x-flex-direction-column x-gap-14px"><div class="x-font-size-22px x-font-weight-800">Agent sign-in</div><div class="dfield rn-field"><label for="in-S20-agent">Agent profile</label><div class="box rn-select"><select id="in-S20-agent" name="agent" class="rn-input" aria-describedby="in-S20-agent-err" required><option value="Meera S.">Meera S.</option><option value="Vikram R.">Vikram R.</option><option value="Farah N.">Farah N.</option></select></div><span class="rn-err" id="in-S20-agent-err" data-err="agent" hidden></span></div><div class="dfield rn-field"><label for="in-S20-code">Demo code</label><div class="box"><input id="in-S20-code" name="code" class="rn-input" aria-describedby="in-S20-code-err" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code" autocomplete="one-time-code"></div><span class="rn-err" id="in-S20-code-err" data-err="code" hidden></span></div><button class="dbtn x-height-42px x-justify-content-center x-font-size-14px" type="button" data-do="x.agentSignIn" data-next="S21">Sign in</button><div class="x-color-667685 x-font-size-12-5px">Demo code 246810. Simulated sign-in: no account, no real customer data.</div></div></div></div></div>
+<div class="details">
+  <div class="grid2">
+    <div><h3>How it works</h3><ol class="steps"><li>Pick an agent profile and enter the demo code.</li><li>Sign-in sets the agent to Available and opens the queue (S21).</li></ol></div>
+    <div><h3>What is on the screen</h3><ul class="clean"><li>Agent profile</li><li>Demo code</li><li>Sign in</li></ul></div>
+  </div>
+  <div><h3>Backend calls</h3><div class="tw"><table><thead><tr><th>Method</th><th>Endpoint / channel</th><th>Why</th></tr></thead><tbody><tr><td class="m"><span class="pill post">POST</span></td><td class="m">/v1/support/agents/session</td><td>OIDC + MFA in production (future)</td></tr></tbody></table></div></div>
+  <div class="grid2">
+    <div><h3>Events published</h3><div><span class="pill ev">agent.signed_in</span> </div></div>
+    <div><h3>Data used</h3><ul class="clean"><li>Nothing stored</li></ul></div>
+  </div>
+  <div><h3>Edge cases and validation</h3><ul class="clean"><li>Wrong code shows an inline error.</li></ul></div>
+  <div class="grid2">
+    <div><h3>Comes from</h3><div class="navlinks"><a href="../../screens/support/S01-who-needs-help.html">S01 · Who needs help?</a></div></div>
+    <div><h3>Goes to</h3><div class="navlinks"><a href="../../screens/support/S21-queue.html">S21 · Agent queue</a></div></div>
+  </div>
+</div></div>
+<div class="pager"><a href="../../screens/support/S10-call-back.html">← S10 Call me back</a><a href="../../screens/support/S21-queue.html">S21 Agent queue →</a></div>
+</main>
+</body></html>

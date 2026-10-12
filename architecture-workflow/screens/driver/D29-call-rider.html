@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>D29 Call rider · RideNova</title><link rel="stylesheet" href="../../assets/site.css"><link rel="stylesheet" href="../../assets/mock.css"><link rel="stylesheet" href="../../assets/css/prototype.css"><link rel="stylesheet" href="../../assets/css/generated/extracted.css"><script src="../../assets/brand.js" defer></script></head>
+<body>
+<header class="topnav"><div class="in"><a class="logo" href="../../index.html"><i></i><span class="brandname">RideNova</span> Blueprint</a><nav><a href="../../index.html" class="">Home</a><a href="../../architecture/index.html" class="">Architecture</a><a href="../../screens/rider/index.html" class="">Customer app</a><a href="../../screens/driver/index.html" class="on">Driver app</a><a href="../../screens/partner/index.html" class="">Partner app</a><a href="../../screens/admin/index.html" class="">Admin portal</a><a href="../../screens/support/index.html" class="">Support (design)</a><a href="../../flows/index.html" class="">User flows</a><a href="../../images/index.html" class="">Image gallery</a><a href="../../prototype/index.html" class="">Prototype</a></nav></div></header>
+<main class="page">
+<div class="head"><div class="crumbs"><a href="../../index.html">Home</a> / <a href="index.html">Driver & delivery app</a> / D29</div>
+<div class="eyebrow">Driver & delivery app · D29</div><h1>Call rider</h1><p class="lead">Masked call from the driver to the rider during an assigned ride. New; mirrors the rider's call screen (R13).</p></div>
+<div class="spec-open"><a class="rn-dbtn primary" href="../../../driver-app/index.html#/D29">Open D29 in the Driver & delivery app prototype</a>
+<span class="xs">The mock below is the approved design; the working screen is in the application.</span></div>
+<div class="screen-layout"><div class="mock-holder" id="mock"><div class="phone"><div class="scr dark"><div class="sb"><span>9:41</span><span class="isl"></span><span class="ico">5G <i></i></span></div><div class="body center x-justify-content-center x-gap-14px"><div class="av lg x-width-96px x-height-96px x-font-size-30px">AR</div><div class="h1">Ananya R.</div><div class="sub">Calling through <span class="brandname">RideNova</span> · numbers hidden</div><div class="x-font-size-18px x-font-variant-numeric-tabular-nums">00:00</div><div class="x-display-flex x-gap-26px x-margin-top-40px"><div class="center x-gap-6px" role="button" tabindex="0" data-ui="toggle"><span class="ic x-width-58px x-height-58px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span class="xs">Mute</span></div><div class="center x-gap-6px" role="button" tabindex="0" data-ui="toggle"><span class="ic x-width-58px x-height-58px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20.5h4"/></svg></span><span class="xs">Speaker</span></div><div class="center x-gap-6px" role="button" tabindex="0" data-msg="Simulated in the prototype: quick message to the rider."><span class="ic x-width-58px x-height-58px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg></span><span class="xs">Message</span></div></div><div role="button" tabindex="0" data-back aria-label="End call" class="x-margin-top-36px x-width-70px x-height-70px x-border-radius-50 x-background-d93a1e x-color-fff x-display-flex x-align-items-center x-justify-content-center"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></div><div class="xs x-margin-top-24px">Simulated call · no audio, no real numbers</div></div></div></div></div>
+<div class="details">
+  <div class="grid2">
+    <div><h3>How it works</h3><ol class="steps"><li>Opened from the phone icon on D08 and D09.</li><li>Only available while the ride is assigned (proxy number window).</li><li>End returns to the trip screen.</li></ol></div>
+    <div><h3>What is on the screen</h3><ul class="clean"><li>Rider name</li><li>Timer</li><li>Mute, speaker, message</li><li>End call</li></ul></div>
+  </div>
+  <div><h3>Backend calls</h3><div class="tw"><table><thead><tr><th>Method</th><th>Endpoint / channel</th><th>Why</th></tr></thead><tbody><tr><td class="m"><span class="pill post">POST</span></td><td class="m">/v1/rides/{id}/call</td><td>Bridge a masked call (future, Asterisk)</td></tr></tbody></table></div></div>
+  <div class="grid2">
+    <div><h3>Events published</h3><div><span class="pill ev">call.started</span> <span class="pill ev">call.ended</span> </div></div>
+    <div><h3>Data used</h3><ul class="clean"><li>Ride id</li></ul></div>
+  </div>
+  <div><h3>Edge cases and validation</h3><ul class="clean"><li>No microphone permission is requested.</li><li>Outside an active ride the call is refused.</li></ul></div>
+  <div class="grid2">
+    <div><h3>Comes from</h3><div class="navlinks"><span class="xs">Entry point</span></div></div>
+    <div><h3>Goes to</h3><div class="navlinks"><a href="../../screens/driver/D08-to-pickup.html">D08 · Navigate to pickup</a><a href="../../screens/driver/D09-arrived-otp.html">D09 · Arrived & start trip</a></div></div>
+  </div>
+</div></div>
+<div class="pager"><a href="../../screens/driver/D08-to-pickup.html">← D08 Navigate to pickup</a><a href="../../screens/driver/D09-arrived-otp.html">D09 Arrived & start trip →</a></div>
+</main>
+</body></html>
