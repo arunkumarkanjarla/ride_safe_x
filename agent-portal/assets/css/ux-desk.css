@@ -1,0 +1,10 @@
+/* desktop UX layer: dark mode via filter inversion (keeps media true-colour), toolbar, undo toast */
+html.rn-dark { filter: invert(.92) hue-rotate(180deg); background: #0b0b0f; }
+html.rn-dark img, html.rn-dark video, html.rn-dark canvas, html.rn-dark svg image, html.rn-dark iframe, html.rn-dark .map, html.rn-dark [class*="map-"] { filter: invert(1) hue-rotate(180deg); }
+#rnux-bar { position: fixed; right: 12px; bottom: 12px; z-index: 9998; display: flex; gap: 6px; align-items: center; background: #fff; border: 1px solid #d0d5dd; border-radius: 999px; padding: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.12); }
+#rnux-bar button, #rnux-bar select { min-height: 44px; min-width: 44px; border: 0; border-radius: 999px; background: #f2f4f7; font: inherit; font-size: 15px; cursor: pointer; padding: 0 10px; }
+#rnux-bar button:focus-visible, #rnux-bar select:focus-visible, .rnux-undo button:focus-visible { outline: 3px solid #2e90fa; outline-offset: 2px; }
+.rnux-undo { position: fixed; left: 50%; bottom: 72px; transform: translateX(-50%); z-index: 9999; display: flex; gap: 16px; align-items: center; background: #1d2939; color: #fff; padding: 10px 12px 10px 16px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.25); animation: rnux-in .18s ease-out; }
+.rnux-undo button { min-height: 44px; background: transparent; color: #84caff; border: 0; font-weight: 700; cursor: pointer; padding: 0 10px; }
+@keyframes rnux-in { from { opacity: 0; transform: translate(-50%, 8px); } }
+@media (prefers-reduced-motion: reduce) { .rnux-undo { animation: none; } }

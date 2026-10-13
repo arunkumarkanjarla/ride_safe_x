@@ -32,7 +32,7 @@
       });
     } };
   }
-  function navButton(label, sid, primary) { return { label: label, primary: primary, onClick: function () { UI.go(sid); } }; }
+  function navButton(label, sid, primary) { return { label: label, primary: primary, onClick: function () { if (document.querySelector('.rn-screen[data-sid="' + sid + '"]')) return UI.go(sid); var app = { R: 'customer-app', D: 'driver-app', P: 'patner-app', G: 'agent-portal' }[sid.charAt(0)]; if (app) { window.open('../' + app + '/index.html#' + sid, '_blank'); UI.toast('Opened ' + sid + ' in the ' + app + ' demo (new tab).', 'info'); } else UI.toast('Screen ' + sid + ' is not available here.', 'warn'); } }; }
 
   // shared actions used by many screens
   var COMMON = {

@@ -1,0 +1,6 @@
+const path=require('path');const { Browser, fileUrl, sleep } = require('../architecture-workflow/tests/browser/cdp');
+const APP=path.resolve(__dirname,'../customer-app/index.html');
+(async()=>{const b=await Browser.launch();const p=await b.newPage();await p.viewport(1100,900);await p.goto(fileUrl(APP));await p.eval(`localStorage.clear();RN.store.signIn('9848004321')`);await p.goto(fileUrl(APP));await sleep(2000);
+console.log(await p.eval(`(()=>{const x=document.querySelector('.rn-screen[data-sid="R29"] .p-home-extra'); if(!x) return 'no extra'; let n=x.parentElement; while(n && !(n.scrollHeight>n.clientHeight+2 && /auto|scroll/.test(getComputedStyle(n).overflowY))) n=n.parentElement; const r=x.getBoundingClientRect(); return JSON.stringify({scroller: n? n.className : null, sh: n&&n.scrollHeight, ch: n&&n.clientHeight, top:r.top, h:r.height, w:r.width, offerW: document.querySelector('.p-offer').getBoundingClientRect().width})})()`));
+await p.eval(`RN.ui.go('R18')`); await sleep(600); console.log('tip', await p.eval(`!!document.querySelector('.rn-screen[data-sid="R18"] .p-tip')`), await p.eval(`(()=>{const b=document.querySelector('.rn-screen[data-sid="R18"] .body'); return b.scrollHeight+'/'+b.clientHeight+' '+getComputedStyle(b).overflowY})()`));
+console.log(JSON.stringify(p.errors).slice(0,300));await b.close()})()

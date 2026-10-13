@@ -147,7 +147,7 @@
       var others = h('div', { class: 'list' });
       function drawOthers() {
         P.clear(others);
-        u.saved.other.forEach(function (o, i) { others.appendChild(P.row({ icon: 'pin', title: o.name, sub: o.area, trail: h('button', { type: 'button', class: 'ib', 'aria-label': 'Remove ' + o.name, on: { click: function (e) { e.stopPropagation(); u.saved.other.splice(i, 1); S.save(); drawOthers(); } } }, ic('trash', 16)) })); });
+        u.saved.other.forEach(function (o, i) { others.appendChild(P.row({ icon: 'pin', title: o.name, sub: o.area, trail: h('button', { type: 'button', class: 'ib', 'aria-label': 'Remove ' + o.name, on: { click: function (e) { e.stopPropagation(); var gone = u.saved.other.splice(i, 1)[0]; S.save(); drawOthers(); P.undo(o.name + ' removed.', function () { u.saved.other.splice(i, 0, gone); S.save(); drawOthers(); }); } } }, ic('trash', 16)) })); });
         others.hidden = !u.saved.other.length;
       }
       drawOthers(); body.appendChild(others);
@@ -201,7 +201,7 @@
         list.appendChild(h('div', { class: 'li p-contact' }, [h('span', { class: 'ic brand' }, S.initials(c.name)), h('span', { class: 'tx' }, [h('b', null, c.name), h('span', null, c.relation + ' \u00B7 +91 ' + c.phone.slice(0, 5) + ' ' + c.phone.slice(5))]),
           h('span', { class: 'p-actions' }, [P.toggle(c.share, function (on) { c.share = on; S.save(); UI.toast(on ? c.name + ' will get your live trip.' : c.name + ' will not get trip links.', 'info'); }, 'Share trips with ' + c.name),
             h('button', { type: 'button', class: 'ib', 'aria-label': 'Edit ' + c.name, on: { click: function () { form(c); } } }, ic('edit', 15)),
-            h('button', { type: 'button', class: 'ib', 'aria-label': 'Delete ' + c.name, on: { click: function () { UI.confirm('Remove ' + c.name + ' from your emergency contacts?', 'Remove').then(function (y) { if (!y) return; u.emergency.splice(i, 1); S.save(); P.applyUser(u); UI.toast(c.name + ' removed.', 'info'); v.draw(); }); } } }, ic('trash', 15))])]));
+            h('button', { type: 'button', class: 'ib', 'aria-label': 'Delete ' + c.name, on: { click: function () { UI.confirm('Remove ' + c.name + ' from your emergency contacts?', 'Remove').then(function (y) { if (!y) return; var gone = u.emergency.splice(i, 1)[0]; S.save(); P.applyUser(u); v.draw(); P.undo(c.name + ' removed.', function () { u.emergency.splice(i, 0, gone); S.save(); P.applyUser(u); v.draw(); }); }); } } }, ic('trash', 15))])]));
       });
       if (u.emergency.length) body.appendChild(list);
       body.appendChild(P.btn(u.emergency.length >= 5 ? 'Contact limit reached (5)' : 'Add contact', u.emergency.length >= 5 ? 'ghost' : '', function () { if (u.emergency.length >= 5) { UI.toast('You can add up to 5 contacts. Remove one first.', 'warn'); return; } form(null); }));
@@ -238,7 +238,7 @@
       body.appendChild(P.sec('PAYMENT METHODS'));
       var ml = h('div', { class: 'list' });
       ml.appendChild(P.row({ icon: 'wallet', tone: 'brand', title: 'Wallet', sub: rs(u.walletPaise) + ' available', right: 'Default', rightKind: 'ok' }));
-      (u.methods || []).forEach(function (m, i) { ml.appendChild(P.row({ icon: m.type === 'upi' ? 'bolt' : 'card', title: m.type === 'upi' ? 'UPI \u00B7 ' + m.value : m.brand + ' \u00B7\u00B7\u00B7\u00B7 ' + m.last4, sub: m.type === 'upi' ? 'Linked UPI ID' : m.name + ' \u00B7 expires ' + m.exp, trail: h('button', { type: 'button', class: 'ib', 'aria-label': 'Remove', on: { click: function (e) { e.stopPropagation(); u.methods.splice(i, 1); S.save(); v.draw(); UI.toast('Payment method removed.', 'info'); } } }, ic('trash', 15)) })); });
+      (u.methods || []).forEach(function (m, i) { ml.appendChild(P.row({ icon: m.type === 'upi' ? 'bolt' : 'card', title: m.type === 'upi' ? 'UPI \u00B7 ' + m.value : m.brand + ' \u00B7\u00B7\u00B7\u00B7 ' + m.last4, sub: m.type === 'upi' ? 'Linked UPI ID' : m.name + ' \u00B7 expires ' + m.exp, trail: h('button', { type: 'button', class: 'ib', 'aria-label': 'Remove', on: { click: function (e) { e.stopPropagation(); var gone = u.methods.splice(i, 1)[0]; S.save(); v.draw(); P.undo('Payment method removed.', function () { u.methods.splice(i, 0, gone); S.save(); v.draw(); }); } } }, ic('trash', 15)) })); });
       ml.appendChild(P.row({ icon: 'plus', title: 'Add card or UPI ID', sub: 'Saved on this device only (demo)', chev: true, onClick: function () { addMethod(v); } }));
       body.appendChild(ml);
       body.appendChild(P.sec('TRANSACTIONS'));

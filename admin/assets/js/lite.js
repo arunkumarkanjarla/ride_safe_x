@@ -58,8 +58,8 @@
     t.addEventListener('click', function () { var v = !t.classList.contains('on'); t.classList.toggle('on', v); t.setAttribute('aria-checked', String(v)); onChange && onChange(v); }); return t;
   };
   L.row = function (o) {
-    var tag = o.onClick ? 'button' : 'div', r = h(tag, { class: 'li', type: tag === 'button' ? 'button' : null }, [o.icon ? h('span', { class: 'ic ' + (o.tone || '') }, o.icon) : null, h('span', { class: 'tx' }, [h('b', null, o.title), o.sub ? h('span', null, o.sub) : null]), o.right ? h('span', { class: 'tag ' + (o.kind || '') }, o.right) : null, o.trail || null]);
-    if (o.onClick) r.addEventListener('click', o.onClick); return r;
+    var tag = o.onClick && !o.trail ? 'button' : 'div', r = h(tag, { class: 'li', type: tag === 'button' ? 'button' : null }, [o.icon ? h('span', { class: 'ic ' + (o.tone || '') }, o.icon) : null, h('span', { class: 'tx' }, [h('b', null, o.title), o.sub ? h('span', null, o.sub) : null]), o.right ? h('span', { class: 'tag ' + (o.kind || '') }, o.right) : null, o.trail || null]);
+    if (o.onClick) { r.addEventListener('click', function (e) { if (e.target.closest('.toggle,.chip,input,select') && e.target.closest('.toggle,.chip,input,select') !== r) return; o.onClick(e); }); if (tag === 'div') { r.setAttribute('role', 'button'); r.setAttribute('tabindex', '0'); r.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target === r) { e.preventDefault(); o.onClick(e); } }); } } return r;
   };
   L.list = function (rows) { return h('div', { class: 'list' }, rows); };
   L.sheet = function (title, build) {
@@ -74,7 +74,7 @@
   // define or extend a screen: build(body, ctx) draws into the screen's .body (status bar, app bar and bottom nav are kept)
   L.screen = function (sid, build, more) {
     var sec = function () { return document.querySelector('.rn-screen[data-sid="' + sid + '"]'); };
-    var cfg = Object.assign({}, more || {}, { init: function (ctx) { var body = UI.q('.body', sec()); if (!body) return; clear(body); body.classList.remove('x-gap-10px'); body.classList.add('p-lite'); build(body, { ctx: ctx, redraw: function () { clear(body); build(body, { ctx: ctx }); } }); if (more && more.init) more.init(ctx); } });
+    var cfg = Object.assign({}, more || {}, { init: function (ctx) { var body = UI.q('.body', sec()); if (!body) return; clear(body); body.classList.remove('x-gap-10px'); body.classList.add('p-lite'); var v = { ctx: ctx, redraw: function () { clear(body); build(body, v); } }; build(body, v); if (more && more.init) more.init(ctx); } });
     if (RN.screens[sid]) K.extend(sid, cfg); else K.def(sid, cfg);
   };
   L.every = function (fn) { L.tickers.push(fn); };

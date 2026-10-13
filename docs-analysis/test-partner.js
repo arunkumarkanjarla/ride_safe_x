@@ -15,7 +15,7 @@ async function section(n, fn) { const e0 = page.errors.length; try { await fn();
   const b = await Browser.launch(); page = await b.newPage(); await page.viewport(1100, 900);
   await page.goto(fileUrl(APP)); await ev('localStorage.clear()'); await page.goto(fileUrl(APP)); await until('window.RN&&RN.ui&&RN.ui.sid&&RN.lite'); await sleep(300);
   await section('sign in + remember', async () => {
-    await at('P08'); await ev(`document.querySelector('#mock [data-do*=partnerSignIn]').click()`); await sleep(200); check('sign-in validation', (await err('email')).length > 0);
+    await at('P08'); await ev(`document.querySelector('#mock [data-do*=partnerSignIn]').click()`); await sleep(700); check('sign-in validation', /6-digit/.test(await ev(`document.querySelector('#mock .body').textContent`)) && (await ev('RN.ui.sid'))==='P08'); await sleep(900);
     await setv('email', 'owner@biryanihouse.example'); await setv('code', '482716'); await ev(`document.querySelector('#mock [data-do*=partnerSignIn]').click()`); await at('P09');
     await sleep(1500); await page.goto(fileUrl(APP)); await until('window.RN&&RN.ui&&RN.ui.sid'); await until(`RN.ui.sid==='P09'`, 8000, 'restored to P09'); check('session remembered after reload', true);
   });

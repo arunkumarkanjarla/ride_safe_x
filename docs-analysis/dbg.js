@@ -1,0 +1,5 @@
+const path=require('path');const { Browser, fileUrl, sleep } = require('../architecture-workflow/tests/browser/cdp');
+(async()=>{const b=await Browser.launch();const p=await b.newPage();await p.viewport(1100,900);await p.goto(fileUrl(path.resolve(__dirname,'../patner-app/index.html')));await sleep(1500);
+console.log(await p.eval(`(()=>{const e=document.querySelector('#mock [data-do*=partnerSignIn]');return JSON.stringify({sid:RN.ui.sid,btn:e&&e.outerHTML.slice(0,200),fields:[...document.querySelectorAll('#mock input')].map(i=>i.name+':'+i.id), errs:[...document.querySelectorAll('#mock [data-err],#mock .rn-err')].map(x=>x.outerHTML.slice(0,100))})})()`));
+await p.eval(`(()=>{const e=document.querySelector('#mock [name=code]');e.value='482716';document.querySelector('#mock [data-do*=partnerSignIn]').click()})()`);await sleep(1500);console.log(await p.eval('RN.ui.sid'));
+console.log(await p.eval(`document.querySelector('#mock').textContent.slice(0,300)`));console.log(JSON.stringify(p.errors));await b.close()})()

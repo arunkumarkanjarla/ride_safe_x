@@ -15,7 +15,8 @@ const text = (sel) => ev(`(document.querySelector('#mock '+${J(sel)})||{textCont
 const go = async (sid) => { await ev(`RN.ui.go('${sid}')`); await at(sid); await sleep(150); };
 const store = () => ev(`JSON.stringify(RN.store.user())`).then(JSON.parse);
 const errsSince = (n) => page.errors.slice(n);
-async function pay(method) { await until(`document.querySelector('#mock .p-sheet')`); await clickText('.p-sheet .li', method); await clickText('.p-sheet button.btn', 'Pay'); await until(`!document.querySelector('#mock .p-sheet')`, 6000, 'sheet closed after pay'); }
+async function pay(method) { await until(`document.querySelector('#mock .p-sheet')`); await clickText('.p-sheet .li', method); await clickText('.p-sheet button.btn', 'Pay'); await sleep(150); if (await ev(`!!document.querySelector('#mock .p-pin')`)) { PIN_SEEN++; for (const k of '1234') await ev(`[...document.querySelectorAll('#mock .p-key')].find(b=>b.textContent==='${k}')?.click()`); await clickText('.p-sheet button.btn', 'Pay'); } await until(`!document.querySelector('#mock .p-sheet')`, 8000, 'sheet closed after pay'); await until(`!document.querySelector('#mock .p-success')`, 5000, 'success animation done'); }
+let PIN_SEEN = 0;
 async function section(name, fn) { const e0 = page.errors.length; try { await fn(); } catch (e) { fails++; console.log('FAIL ' + name + ' -> ' + e.message); } const er = errsSince(e0); if (er.length) { fails++; console.log('FAIL ' + name + ' page errors ' + J(er).slice(0, 400)); } }
 
 (async () => {
@@ -125,6 +126,6 @@ async function section(name, fn) { const e0 = page.errors.length; try { await fn
     });
   } catch (e) { fails++; console.log('ERROR', e.message); }
   console.log('page errors:', J(page.errors.slice(0, 8)));
-  console.log(fails ? 'FAILED ' + fails : 'ALL PASSED');
+  check('UPI PIN sheet used', PIN_SEEN > 0, PIN_SEEN); console.log(fails ? 'FAILED ' + fails : 'ALL PASSED');
   await b.close();
 })();

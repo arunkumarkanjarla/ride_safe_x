@@ -15,7 +15,7 @@
     reviews: [{ id: 1, name: 'Ananya', stars: 5, text: 'Hot and on time', reply: '' }, { id: 2, name: 'Rahul', stars: 3, text: 'Biryani was cold (saver delivery)', reply: '' }, { id: 3, name: 'Divya', stars: 5, text: 'Best dum biryani in the area', reply: 'Thank you Divya!' }],
     app: null
   });
-  var D = ST.data;
+  var D = ST.data; RN.partnerStore = ST;
   function t12(t) { var p = t.split(':'), hh = +p[0]; return (hh % 12 || 12) + ':' + p[1] + (hh < 12 ? ' AM' : ' PM'); }
   function pick(sel, o) { var x = UI.val(sel); return x; }
 
@@ -31,7 +31,6 @@
   K.extend('P08', { init: function () {
     var f = UI.field('email'); if (f && !f.value && D.email) f.value = D.email;
     if (f) f.addEventListener('change', function () { D.email = f.value.trim(); ST.save(); });
-    var hint = UI.q('#mock .body'); if (hint && !UI.q('#mock .p-hint')) hint.appendChild(h('div', { class: 'xs p-hint' }, 'Demo: use any e-mail address and code ' + RN.data.DEMO_CODES.riderOtp + '.'));
   } });
 
   // ---- P01 onboarding: a real application form
@@ -64,9 +63,11 @@
       UI.toast('Application ' + D.app.id + ' submitted.', 'info'); v.redraw();
     }));
   });
-  function appStage() { return D.app ? Math.min(3, Math.floor((Date.now() - D.app.at) / 15000)) : 0; }
+  // approval comes from the admin portal (Platform control > Partners) via RNPC; -1 = rejected. Fallback: 15 s per stage
+  function appStage() { if (RN.partnerStage) return RN.partnerStage(D); return D.app ? Math.min(3, Math.floor((Date.now() - D.app.at) / 15000)) : 0; }
   function drawStatus(body, v) {
     var s = appStage(); body.appendChild(h('div', { class: 'card-m' }, [h('b', null, D.app.biz), h('span', { class: 'xs' }, D.app.type + ' \u00B7 ' + D.app.id + ' \u00B7 submitted ' + L.fdt(D.app.at))]));
+    if (s < 0) { body.appendChild(L.banner('warn', 'Application not approved: ' + (D.app.reason || 'Please contact partner support.'))); body.appendChild(L.btn('Edit and apply again', '', function () { D.app = null; ST.save(); v.redraw(); })); return; }
     STAGES.forEach(function (t, i) { body.appendChild(L.row({ title: t, sub: i <= s ? (i === 3 ? 'Done' : 'Completed') : 'Pending', right: i <= s ? 'Done' : 'Waiting', kind: i <= s ? 'ok' : 'info' })); });
     if (s === 3) { body.appendChild(L.banner('info', 'Your business is approved. Sign in with ' + D.app.email + '.')); body.appendChild(L.btn('Go to sign in', '', function () { UI.go('P08'); })); }
     else body.appendChild(L.banner('info', 'An admin reviews this on the admin console. This usually takes a few minutes (demo: under a minute).'));
@@ -85,7 +86,7 @@
     var rows = D.menu.map(function (m) {
       return L.row({ title: m.n, sub: rs(m.p * 100) + (m.note ? ' \u00B7 ' + m.note : '') + (m.veg ? ' \u00B7 veg' : ''), onClick: function () { itemSheet(m, v); }, trail: L.toggle(m.on, function (on) { m.on = on; if (!on && !m.note) m.note = 'unavailable'; if (on && /unavailable/.test(m.note)) m.note = ''; ST.save(); UI.toast(m.n + (on ? ' is available.' : ' marked unavailable.'), 'info'); }, m.n + ' available') });
     });
-    var list = L.list(rows); list.addEventListener('click', function (e) { if (e.target.closest('.toggle')) e.stopPropagation(); }, true); body.appendChild(list);
+    body.appendChild(L.list(rows));
     body.appendChild(L.sec('OPENING HOURS'));
     body.appendChild(L.list([L.row({ title: t12(D.hours.open) + ' - ' + t12(D.hours.close) + ' ' + D.hours.days, sub: 'Tap to change', onClick: function () { hoursSheet(v); } })]));
     body.appendChild(L.sec('OFFERS YOU FUND'));
@@ -104,7 +105,7 @@
         if (bad) return; if (m) Object.assign(m, { n: n, p: p, note: UI.val('inote').trim(), veg: veg }); else D.menu.push({ id: D.nextId++, n: n, p: p, veg: veg, on: true, note: UI.val('inote').trim() });
         ST.save(); api.close(); UI.toast(m ? 'Item updated.' : n + ' added to your menu.', 'info'); v.redraw();
       }));
-      if (m) b.appendChild(L.btn('Remove item', 'danger', function () { api.close(); UI.confirm('Remove ' + m.n + ' from your menu?', 'Remove').then(function (y) { if (y) { D.menu.splice(D.menu.indexOf(m), 1); ST.save(); UI.toast('Removed.', 'info'); v.redraw(); } }); }));
+      if (m) b.appendChild(L.btn('Remove item', 'danger', function () { api.close(); UI.confirm('Remove ' + m.n + ' from your menu?', 'Remove').then(function (y) { if (y) { var at = D.menu.indexOf(m); D.menu.splice(at, 1); ST.save(); v.redraw(); var f = function () { D.menu.splice(at, 0, m); ST.save(); v.redraw(); }; if (RN.ux && RN.ux.undoToast) RN.ux.undoToast(m.n + ' removed.', f); else UI.toast('Removed.', 'info'); } }); }));
     });
   }
   function hoursSheet(v) {
@@ -126,14 +127,14 @@
   function ledger() {
     var s = UI.engine ? UI.engine.state : { orders: {} }, extra = 0, n = 0;
     Object.keys(s.orders || {}).forEach(function (k) { var o = s.orders[k]; if (o.state === 'DELIVERED') { extra += o.itemsPaise || 0; n++; } });
-    var gross = 5890000 + extra, comm = Math.round(gross * 0.18), offers = 394000, tds = Math.round(gross * 0.0336);
+    var gross = 5890000 + extra, comm = Math.round(gross * (RN.partnerCommission ? RN.partnerCommission() : 18) / 100), offers = 394000, tds = Math.round(gross * 0.0336);
     return { gross: gross, comm: comm, offers: offers, tds: tds, net: gross - comm - offers - tds - D.paidOut, n: n };
   }
   L.screen('P07', function (body, v) {
     var l = ledger();
     body.appendChild(h('div', { class: 'card-m brand' }, [h('span', { class: 'xs' }, 'Available balance' + (l.n ? ' (includes ' + l.n + ' new order' + (l.n > 1 ? 's' : '') + ')' : '')), h('b', { class: 'big-num' }, rs(l.net)), h('span', { class: 'xs' }, 'Weekly to ' + D.bank.ifsc.slice(0, 4) + ' ' + D.bank.acct.slice(-4) + ' \u00B7 next payout Monday')]));
     body.appendChild(L.btn('Request instant payout', '', function () { payoutSheet(l, v); }));
-    body.appendChild(L.sec('THIS WEEK')); body.appendChild(h('div', { class: 'card-m' }, [L.kv('Gross sales', rs(l.gross)), L.kv('Commission (18%)', rs(-l.comm)), L.kv('Offers you funded', rs(-l.offers)), L.kv('Tax deducted at source', rs(-l.tds)), L.kv('Already paid out', rs(-D.paidOut))]));
+    body.appendChild(L.sec('THIS WEEK')); body.appendChild(h('div', { class: 'card-m' }, [L.kv('Gross sales', rs(l.gross)), L.kv('Commission (' + (RN.partnerCommission ? RN.partnerCommission() : 18) + '%)', rs(-l.comm)), L.kv('Offers you funded', rs(-l.offers)), L.kv('Tax deducted at source', rs(-l.tds)), L.kv('Already paid out', rs(-D.paidOut))]));
     body.appendChild(L.sec('PAYOUT HISTORY')); body.appendChild(L.list(D.payouts.map(function (p) { return L.row({ title: p.id + ' \u00B7 ' + rs(p.paise), sub: L.fdt(p.at), right: p.state, kind: p.state === 'Paid' ? 'ok' : 'info' }); })));
     var avg = D.reviews.reduce(function (s, r) { return s + r.stars; }, 0) / D.reviews.length;
     body.appendChild(L.sec('REVIEWS \u00B7 ' + avg.toFixed(1) + ' \u2605 (' + D.reviews.length + ')'));

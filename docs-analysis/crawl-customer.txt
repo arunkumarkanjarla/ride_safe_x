@@ -1,0 +1,11 @@
+start sid R29 screens 60
+R01 R02 R58 R57 R03 R04 R05 R06 R53 R29 R30 R52 R51 R07 R08 R31 R09 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R55 R23 R32 R33 R34 R35 R43 R36 R37 R38 R39 R40 R41 R42 R44 R45 R46 R47 R48 R49 R50 R22 R21 R54 R56 R20 R24 R25 R26 R27 R28 R62 R59 
+timed-out screens: R29 (timeout screen)
+redirected screens: R02->R29 R03->R29 R04->R29 R05->R29 R12->R11 R15->R12 R17->R12 R42->R41
+DEAD controls (5):
+  R29: Home [go=R29]
+  R16: SOS [do=x.sos]
+  R32: Swap []
+  R21: Wallet [go=R21]
+  R54: Trips [go=R54]
+page errors: []

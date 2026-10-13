@@ -316,7 +316,7 @@
       body.appendChild(h('div', { class: 'chips' }, ['I\'m on my way', 'Please wait', 'Call me', 'Where are you?'].map(function (t) { return h('button', { type: 'button', class: 'chip', on: { click: function () { send(t); } } }, t); })));
       var input = h('input', { class: 'p-search', type: 'text', maxlength: 140, placeholder: 'Message', 'aria-label': 'Message' });
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { send(input.value); input.value = ''; } });
-      body.appendChild(h('div', { class: 'p-compose' }, [h('div', { class: 'inp' }, h('div', { class: 'box' }, input)), h('button', { type: 'button', class: 'p-send', 'aria-label': 'Send', on: { click: function () { send(input.value); input.value = ''; input.focus(); } } }, ic('send', 18))]));
+      body.appendChild(h('div', { class: 'p-compose' }, [h('div', { class: 'inp' }, h('div', { class: 'box' }, input)), h('button', { type: 'button', class: 'p-send', 'aria-label': 'Send', on: { click: function () { if (!input.value.trim()) { UI.toast('Type a message first.', 'warn'); input.focus(); return; } send(input.value); input.value = ''; input.focus(); } } }, ic('send', 18))]));
       draw();
     }
   });

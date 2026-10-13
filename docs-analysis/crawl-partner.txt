@@ -1,0 +1,6 @@
+start sid P08 screens 11
+P08 P01 P09 P02 P03 P04 P05 P06 P07 P10 P11 
+timed-out screens: 
+redirected screens: P09->P08 P02->P08 P03->P08 P04->P08 P05->P08 P06->P08 P07->P08 P10->P08 P11->P08
+DEAD controls (0):
+page errors: []

@@ -68,7 +68,7 @@
       var from = P.field({ name: 'from', label: 'From', select: names, value: lt.from, on: { change: function () { lt.from = UI.val('from'); } } });
       var to = P.field({ name: 'to', label: 'To', select: names, value: lt.to, on: { change: function () { lt.to = UI.val('to'); } } });
       body.appendChild(from); body.appendChild(to);
-      body.appendChild(h('button', { type: 'button', class: 'chip p-swap', on: { click: function () { var a = UI.val('from'), b = UI.val('to'); from.input.value = b; to.input.value = a; lt.from = b; lt.to = a; } } }, [ic('repeat', 14), ' Swap']));
+      body.appendChild(h('button', { type: 'button', class: 'chip p-swap', on: { click: function () { var a = UI.val('from'), b = UI.val('to'); if (a.trim() === b.trim()) { UI.toast(a.trim() ? 'Pickup and destination are the same.' : 'Enter both places to swap them.', 'info'); return; } from.input.value = b; to.input.value = a; lt.from = b; lt.to = a; } } }, [ic('repeat', 14), ' Swap']));
       body.appendChild(P.field({ name: 'date', label: 'Travel date', type: 'date', value: lt.date, min: P.isoDate(Date.now()), on: { change: function () { lt.date = UI.val('date'); } } }));
       body.appendChild(retBox);
       body.appendChild(h('div', { class: 'kv' }, [h('span', null, 'Passengers'), P.stepper(lt.pax, function (n) { lt.pax = n; }, 1, 6)]));
@@ -241,7 +241,7 @@
       var added = h('div'), list = h('div', { class: 'list' }); body.appendChild(added); body.appendChild(list);
       function draw() {
         P.clear(list); P.clear(added);
-        if (u.stops.length) { added.appendChild(P.sec('YOUR STOPS')); added.appendChild(P.list(u.stops.map(function (s, i) { return P.row({ icon: 'pin', tone: 'brand', title: s.n, sub: 'km ' + s.km + ' \u00B7 ' + s.kind, trail: h('button', { type: 'button', class: 'ib', 'aria-label': 'Remove ' + s.n, on: { click: function () { u.stops.splice(i, 1); S.save(); draw(); } } }, ic('x', 14)) }); }))); }
+        if (u.stops.length) { added.appendChild(P.sec('YOUR STOPS')); added.appendChild(P.list(u.stops.map(function (s, i) { return P.row({ icon: 'pin', tone: 'brand', title: s.n, sub: 'km ' + s.km + ' \u00B7 ' + s.kind, trail: h('button', { type: 'button', class: 'ib', 'aria-label': 'Remove ' + s.n, on: { click: function () { var gone = u.stops.splice(i, 1)[0]; S.save(); draw(); P.undo('Stop removed.', function () { u.stops.splice(i, 0, gone); S.save(); draw(); }); } } }, ic('x', 14)) }); }))); }
         P.stopsFor(route).filter(function (s) { return v.f === 'All' || s.kind === v.f; }).forEach(function (s) {
           var has = u.stops.some(function (x) { return x.id === s.id; });
           list.appendChild(P.row({ icon: { Food: 'food', Stays: 'bed', 'Fuel/EV': 'bolt', 'Bus stops': 'bus', Hospitals: 'shield' }[s.kind], title: s.n + (s.price ? ' \u00B7 ' + s.price : ''), sub: 'km ' + s.km + ' \u00B7 ' + P.mins(s.eta) + ' from start \u00B7 \u2605 ' + s.rating, trail: h('button', { type: 'button', class: 'chip' + (has ? ' on' : ''), on: { click: function () { if (has) u.stops = u.stops.filter(function (x) { return x.id !== s.id; }); else u.stops.push(s); S.save(); UI.toast(has ? s.n + ' removed from your plan.' : s.n + ' added as a stop.', 'info'); draw(); } } }, has ? 'Added' : 'Add') }));
@@ -421,7 +421,7 @@
         u.alerts.push({ id: S.uid('AL'), from: f, to: t, paise: p * 100, win: v.win, notify: v.notify, at: Date.now(), fireAt: Date.now() + 20000 + Math.random() * 15000, fired: false }); S.save();
         UI.toast('Watching ' + f + ' \u2192 ' + t + ' for ' + rs(p * 100) + '. We will notify you.', 'info'); v.draw();
       }));
-      if (u.alerts.length) { body.appendChild(P.sec('YOUR ALERTS')); body.appendChild(P.list(u.alerts.map(function (a, i) { return P.row({ icon: 'bell', tone: a.fired ? 'brand' : 'amber', title: a.from + ' \u2192 ' + a.to, sub: 'Target ' + rs(a.paise) + ' \u00B7 ' + a.win, right: a.fired ? 'Price hit' : 'Watching', rightKind: a.fired ? 'ok' : 'info', trail: h('button', { type: 'button', class: 'ib', 'aria-label': 'Remove alert', on: { click: function () { u.alerts.splice(i, 1); S.save(); v.draw(); } } }, ic('trash', 14)) }); }))); }
+      if (u.alerts.length) { body.appendChild(P.sec('YOUR ALERTS')); body.appendChild(P.list(u.alerts.map(function (a, i) { return P.row({ icon: 'bell', tone: a.fired ? 'brand' : 'amber', title: a.from + ' \u2192 ' + a.to, sub: 'Target ' + rs(a.paise) + ' \u00B7 ' + a.win, right: a.fired ? 'Price hit' : 'Watching', rightKind: a.fired ? 'ok' : 'info', trail: h('button', { type: 'button', class: 'ib', 'aria-label': 'Remove alert', on: { click: function () { var gone = u.alerts.splice(i, 1)[0]; S.save(); v.draw(); P.undo('Price alert removed.', function () { u.alerts.splice(i, 0, gone); S.save(); v.draw(); }); } } }, ic('trash', 14)) }); }))); }
     }
   });
   P.every(function () {

@@ -223,6 +223,7 @@
     ['Share seat', 'users', 'R33', 'share', '-40%'], ['Bus', 'bus', 'R33', 'bus'], ['Rentals', 'key', 'R43'], ['Hotels', 'bed', 'R41'],
     ['Food', 'food', 'R44'], ['Parcel', 'box', 'R47'], ['Plan trip', 'sparkle', 'R52', null, 'AI'], ['Deals', 'percent', 'R49']
   ];
+  P.SVC = SVC; // home tiles; the platform bridge rebuilds this list from the admin service catalog
   P.screen('R29', {
     title: 'Home', nav: 'home', hideBar: true,
     build: function (body, v) {
@@ -250,7 +251,7 @@
       });
       body.appendChild(svc);
       var next = (u.bookings || []).filter(function (b) { return b.when && b.when > Date.now() && /Confirmed|Scheduled/.test(b.status); }).sort(function (a, b) { return a.when - b.when; })[0];
-      if (next) body.appendChild(h('button', { type: 'button', class: 'card-m p-next', on: { click: function () { P.nav.booking = next.id; UI.go('R62'); } } }, [h('span', { class: 'ic blue' }, ic(P.iconOf(next.type))), h('span', { class: 'x-flex-1 p-left' }, [h('b', null, next.title), h('div', { class: 'xs' }, fdt(next.when) + ' \u00B7 ' + next.sub)]), h('span', { class: 'tag info' }, 'Upcoming')]));
+      if (next) body.appendChild(h('button', { type: 'button', class: 'card-m p-next', on: { click: function () { P.nav.booking = next.id; UI.go('R62'); } } }, [h('span', { class: 'ic blue' }, ic(P.iconOf(next.type))), h('span', { class: 'x-flex-1 p-left' }, [h('b', null, next.title), h('div', { class: 'xs' }, P.fdt(next.when) + ' \u00B7 ' + next.sub)]), h('span', { class: 'tag info' }, 'Upcoming')]));
       else body.appendChild(h('a', { class: 'card-m p-next', href: '#/R52', 'data-go': 'R52' }, [h('span', { class: 'ic blue' }, ic('sparkle')), h('span', { class: 'x-flex-1 p-left' }, [h('b', null, 'Plan your next trip'), h('div', { class: 'xs' }, 'Ask the AI planner for buses, stays and rentals')]), h('span', { class: 'tag info' }, 'AI')]));
       var goal = 200000, pct = Math.min(100, Math.round(u.savedPaise * 100 / goal));
       body.appendChild(h('a', { class: 'card-m', href: '#/R49', 'data-go': 'R49' }, [h('div', { class: 'kv' }, [h('b', null, 'You saved ' + rs(u.savedPaise) + ' so far'), h('span', { class: 'xs' }, 'Goal ' + rs(goal))]), P.progress(pct), h('span', { class: 'xs' }, u.savedPaise ? 'Coupons and shared rides add up.' : 'Use a coupon on your first booking to start saving.')]));

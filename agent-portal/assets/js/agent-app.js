@@ -216,7 +216,15 @@
   }
 
   // ------------------------------------------------------------------ conversation actions
-  function changed() { render(); if (Date.now() - S.presenceAt > 1500) presence(); }
+  // persistence: the agent's workspace survives a reload (synthetic data only, this browser only)
+  var STORE_KEY = 'ridenova.agent.v1', saveAt = 0;
+  function persist() {
+    try { var a = S.calls; window.localStorage.setItem(STORE_KEY, JSON.stringify({ v: 1, me: S.me ? S.me.id : null, status: S.status, convs: S.convs, order: S.order, seq: S.seq, calls: { queue: a.queue, log: a.log, callbacks: a.callbacks, seq: a.seq, missed: a.missed }, stats: S.stats, ui: S.ui, until: Date.now() + 8 * 3600000 })); } catch (err) { /* storage off: memory only */ }
+  }
+  function restore() {
+    try { var d = JSON.parse(window.localStorage.getItem(STORE_KEY)); if (!d || d.v !== 1 || !d.order) return null; S.convs = d.convs; S.order = d.order; S.seq = d.seq; Object.assign(S.calls, d.calls); S.stats = d.stats; Object.assign(S.ui, d.ui); return d; } catch (err) { return null; }
+  }
+  function changed() { render(); if (Date.now() - S.presenceAt > 1500) presence(); if (Date.now() - saveAt > 700) { saveAt = Date.now(); persist(); } }
   function take(c, quiet) {
     if (!S.me || mine(c)) return !!S.me;
     if (c.assignee && !R().reassign) { toast(c.id + ' belongs to ' + agentName(c.assignee) + '. Only senior agents and supervisors may take it over.', 'error'); return false; }
@@ -845,7 +853,7 @@
       }), 'No callers waiting.');
       fill(cbt, S.calls.callbacks.map(function (x) {
         var ct = contact(x.contactId);
-        return { key: x.id + (x.due < Date.now()), cells: [ct.name, x.due < Date.now() ? st('Due now', 'warn') : hhmm(x.due), x.convId || '—', h('span', { class: 'ag-row' }, [btn('Call now', function () { S.calls.callbacks.splice(S.calls.callbacks.indexOf(x), 1); dial(x.contactId, x.convId); }), btn('Remove', function () { S.calls.callbacks.splice(S.calls.callbacks.indexOf(x), 1); changed(); }, 'g')])] };
+        return { key: x.id + (x.due < Date.now()), cells: [ct.name, x.due < Date.now() ? st('Due now', 'warn') : hhmm(x.due), x.convId || '—', h('span', { class: 'ag-row' }, [btn('Call now', function () { S.calls.callbacks.splice(S.calls.callbacks.indexOf(x), 1); dial(x.contactId, x.convId); }), btn('Remove', function () { var at = S.calls.callbacks.indexOf(x); S.calls.callbacks.splice(at, 1); changed(); if (window.RNUX) RNUX.undoToast('Callback removed.', function () { S.calls.callbacks.splice(at, 0, x); changed(); }); }, 'g')])] };
       }), 'No call-backs scheduled.');
       fill(lgt, S.calls.log.slice(0, 15).map(function (x, i) {
         return { key: i + x.at + x.outcome, cells: [hhmm(x.at), contact(x.contactId).name, x.dir === 'in' ? 'Inbound' : 'Outbound', mmss(x.talk), x.outcome, x.convId || '—'], open: x.convId ? function () { S.sel.case = x.convId; go('G08'); } : null };
@@ -1380,7 +1388,7 @@
     S.calls.active = null;
     SYNC.send('bye', { agentId: S.me.id });
     hubRun('agent.signOut', {});
-    S.me = null; S.status = 'OFFLINE';
+    S.me = null; S.status = 'OFFLINE'; persist();
     q('[data-bind="banner"]').hidden = true;
     history.replaceState(null, '', '#/G01'); route();
   }
@@ -1407,7 +1415,7 @@
     render();
   }
   function boot() {
-    seed(); fillLogin();
+    var saved = restore(); if (!saved) seed(); fillLogin();
     qa('.brandname').forEach(function (n) { n.textContent = BRAND; });
     q('[data-form="signin"]').addEventListener('submit', signIn);
     q('[data-act="signout"]').addEventListener('click', function (e) { e.preventDefault(); signOut(false); });
@@ -1420,8 +1428,11 @@
     window.addEventListener('pagehide', function () { if (S.me) SYNC.send('bye', { agentId: S.me.id }); });
     try { if (window.parent !== window && window.parent.RN_HUB) { window.parent.RN_HUB.register('support', window); window.addEventListener('pagehide', function () { window.parent.RN_HUB.unregister('support', window); }); } } catch (err) { /* not inside the connected demo */ }
     SYNC.send('hello', {});
+    if (saved && saved.me && saved.until > Date.now()) { var ra = agent(saved.me); if (ra && ra.active) { S.me = ra; S.status = saved.status && saved.status !== 'OFFLINE' ? saved.status : 'AVAILABLE'; S.statusAt = Date.now(); S.nextIn = Date.now() + 15000; hubSignIn(ra); SYNC.send('hello', { agentId: ra.id }); if (!/^#\/G(0[2-9]|1\d)/.test(location.hash)) history.replaceState(null, '', '#/G02'); } }
     route();
     setInterval(tick, 1000);
+    setInterval(persist, 5000);
+    window.addEventListener('pagehide', persist);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

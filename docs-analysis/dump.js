@@ -1,0 +1,5 @@
+const path=require('path');const { Browser, fileUrl, sleep } = require('../architecture-workflow/tests/browser/cdp');
+const APP=path.resolve(__dirname,'../customer-app/index.html');
+(async()=>{const b=await Browser.launch();const p=await b.newPage();await p.viewport(1100,900);await p.goto(fileUrl(APP));await p.eval(`localStorage.clear();RN.store.signIn('9848004321')`);await p.goto(fileUrl(APP));await sleep(2000);
+for(const s of process.argv.slice(2)){await p.eval(`RN.ui.go('${s}')`);await sleep(700);console.log('== '+s+': '+(await p.eval(`[...document.querySelector('.rn-screen[data-sid="${s}"] .body').querySelectorAll('b,button,.p-sec,.chip')].map(x=>x.textContent.trim()).filter(Boolean).slice(0,60).join(' | ')`)).slice(0,1400));}
+console.log(JSON.stringify(p.errors).slice(0,300));await b.close()})()

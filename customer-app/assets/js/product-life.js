@@ -329,7 +329,7 @@
       }));
       var input = h('input', { class: 'p-search', type: 'text', maxlength: 160, placeholder: 'Ask in any language', 'aria-label': 'Message the trip assistant' });
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { ask(input.value); input.value = ''; } });
-      body.appendChild(h('div', { class: 'p-compose' }, [h('div', { class: 'inp' }, h('div', { class: 'box' }, input)), h('button', { type: 'button', class: 'p-send', 'aria-label': 'Send', on: { click: function () { ask(input.value); input.value = ''; input.focus(); } } }, ic('send', 18))]));
+      body.appendChild(h('div', { class: 'p-compose' }, [h('div', { class: 'inp' }, h('div', { class: 'box' }, input)), h('button', { type: 'button', class: 'p-send', 'aria-label': 'Send', on: { click: function () { if (!input.value.trim()) { UI.toast('Type a message first.', 'warn'); input.focus(); return; } ask(input.value); input.value = ''; input.focus(); } } }, ic('send', 18))]));
       draw();
     }
   });
@@ -397,7 +397,7 @@
       body.appendChild(h('div', { class: 'chips' }, ['Lost item', 'Payment issue', 'Safety concern', 'I was charged more than the estimate'].map(function (t) { return h('button', { type: 'button', class: 'chip', on: { click: function () { send(t); } } }, t); })));
       var input = h('input', { class: 'p-search', type: 'text', maxlength: 200, placeholder: 'Type your question', 'aria-label': 'Message support' });
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { send(input.value); input.value = ''; } });
-      body.appendChild(h('div', { class: 'p-compose' }, [h('div', { class: 'inp' }, h('div', { class: 'box' }, input)), h('button', { type: 'button', class: 'p-send', 'aria-label': 'Send', on: { click: function () { send(input.value); input.value = ''; input.focus(); } } }, ic('send', 18))]));
+      body.appendChild(h('div', { class: 'p-compose' }, [h('div', { class: 'inp' }, h('div', { class: 'box' }, input)), h('button', { type: 'button', class: 'p-send', 'aria-label': 'Send', on: { click: function () { if (!input.value.trim()) { UI.toast('Type a message first.', 'warn'); input.focus(); return; } send(input.value); input.value = ''; input.focus(); } } }, ic('send', 18))]));
       if ((u.tickets || []).length) { body.appendChild(P.sec('YOUR TICKETS')); body.appendChild(P.list(u.tickets.slice(0, 4).map(function (t) { var ageMin = (Date.now() - t.at) / 60000; return P.row({ icon: 'help', title: t.id + ' \u00B7 ' + t.issue, sub: t.ref ? 'Ref ' + t.ref : P.fdt(t.at), right: ageMin > 3 ? 'In progress' : 'Open', rightKind: ageMin > 3 ? 'ok' : 'info' }); }))); }
       body.appendChild(P.btn('Report an issue with a booking', 'ghost sm', function () { UI.go('R27'); }));
       draw();

@@ -44,7 +44,7 @@
     signOut: function (n, arg) {
       return exec('auth.signOut', {}, n, { actor: arg }).then(function (r) { if (r.ok) { UI.stack = []; UI.go({ rider: 'R58', driver: 'D01', partner: 'P08' }[arg] || UI.entry, { replace: true }); } return r; });
     },
-    sos: function (n) { return exec('sos.raise', {}, n, { instant: true }).then(function (r) { if (r.ok && !r.queued) UI.toast(r.existing ? 'Your SOS ' + r.incidentId + ' is already open.' : 'SOS sent: ' + r.incidentId + '. Safety team alerted (simulated – nobody is actually contacted).', 'warn'); return r; }); },
+    sos: function (n) { return exec('sos.raise', {}, n, { instant: true }).then(function (r) { if (r.duplicate) UI.toast('SOS already sent. The safety team is on it.', 'warn'); else if (r.ok && !r.queued) UI.toast(r.existing ? 'Your SOS ' + r.incidentId + ' is already open.' : 'SOS sent: ' + r.incidentId + '. Safety team alerted (simulated – nobody is actually contacted).', 'warn'); return r; }); },
     adminAction: function (n, arg) {
       var p = String(arg || '').split('|');
       return exec('admin.action', { perm: p[0], label: p[1], event: p[2], target: UI.sid }, n).then(function (r) { if (r.ok) UI.toast('Done: ' + p[1] + ' (simulated, recorded in the audit log).', 'sim'); return r; });

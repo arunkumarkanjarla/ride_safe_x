@@ -131,6 +131,7 @@
     t.get = function () { return t.classList.contains('on'); };
     return t;
   };
+  P.undo = function (msg, onUndo) { if (window.RN && RN.ux && RN.ux.undoToast) RN.ux.undoToast(msg, onUndo); else UI.toast(msg, 'info'); };
   P.row = function (o) {
     var attrs = { class: 'li' + (o.on ? ' on' : '') };
     if (o.go) { attrs['data-go'] = o.go; }
@@ -185,32 +186,69 @@
     return api;
   };
   // payment chooser. opts: {title, paise, allow:[...], note, onPaid(method)}
+  // Payment sheet (PhonePe / Google Pay style): recommended method pre-selected, explicit Pay, UPI PIN step with
+  // payee + amount + anti-fraud copy, then a short success animation with a reference number.
   P.pay = function (opts) {
     var u = S.user(), allow = opts.allow || ['Wallet', 'UPI', 'Card'], choice = null;
+    var upiId = (u.methods || []).filter(function (m) { return m.type === 'upi'; }).map(function (m) { return m.value; })[0];
     P.sheet(opts.title || 'Pay', function (body, api) {
       body.appendChild(h('div', { class: 'p-total' }, [h('span', { class: 'xs' }, 'Amount to pay'), h('b', { class: 'big-num' }, rs(opts.paise))]));
       if (opts.note) body.appendChild(h('div', { class: 'xs' }, opts.note));
-      var list = h('div', { class: 'list p-paylist' });
-      var defs = { Wallet: ['wallet', 'RideNova wallet', rs(u.walletPaise) + ' available'], UPI: ['bolt', 'UPI', (u.methods || []).filter(function (m) { return m.type === 'upi'; }).map(function (m) { return m.value; })[0] || 'Pay with any UPI app'], Card: ['card', 'Debit / credit card', (u.methods || []).filter(function (m) { return m.type === 'card'; }).map(function (m) { return m.brand + ' ending ' + m.last4; })[0] || 'Enter card at checkout (simulated)'], Cash: ['wallet', 'Pay in cash', 'Pay when you receive'] };
+      var list = h('div', { class: 'list p-paylist' }), rows = {};
+      var defs = { Wallet: ['wallet', 'RideNova wallet', rs(u.walletPaise) + ' available'], UPI: ['bolt', 'UPI', upiId || 'Pay with any UPI app'], Card: ['card', 'Debit / credit card', (u.methods || []).filter(function (m) { return m.type === 'card'; }).map(function (m) { return m.brand + ' ending ' + m.last4; })[0] || 'Enter card at checkout (simulated)'], Cash: ['wallet', 'Pay in cash', 'Pay when you receive'] };
+      var pickRow = P.pickGroup(list);
       allow.forEach(function (m) {
         var d = defs[m], low = m === 'Wallet' && u.walletPaise < opts.paise;
-        var row = P.row({ icon: d[0], tone: 'brand', title: d[1], sub: low ? 'Balance too low: add money first' : d[2], onClick: function () { if (low) { UI.toast('Add money to your wallet first.', 'warn'); return; } choice = m; P.pickGroup(list)(row); } });
-        row.setAttribute('aria-pressed', 'false'); if (low) row.classList.add('p-disabled'); list.appendChild(row);
+        var row = P.row({ icon: d[0], tone: 'brand', title: d[1], sub: low ? 'Balance too low: add money first' : d[2], onClick: function () { if (low) { UI.toast('Add money to your wallet first.', 'warn'); return; } choice = m; pickRow(row); go.textContent = (m === 'Cash' ? 'Confirm \u00B7 ' : 'Pay ') + rs(opts.paise); } });
+        row.setAttribute('aria-pressed', 'false'); if (low) row.classList.add('p-disabled'); rows[m] = { row: row, low: low }; list.appendChild(row);
       });
+      body.appendChild(h('div', { class: 'xs p-sec' }, 'PAY WITH'));
       body.appendChild(list);
       var go = P.btn('Pay ' + rs(opts.paise), '', function () {
         if (!choice) { UI.toast('Choose how you want to pay.', 'error'); return; }
-        go.disabled = true; go.textContent = 'Processing payment...';
-        setTimeout(function () {
-          var cur = S.user();
-          if (choice === 'Wallet' && !S.debit(cur, opts.paise, opts.title || 'Payment', 'Payment')) { go.disabled = false; go.textContent = 'Pay ' + rs(opts.paise); UI.toast('Wallet balance changed. Choose another method.', 'error'); return; }
-          api.close(); opts.onPaid(choice);
-        }, 900);
+        if (choice === 'UPI') { pinStep(body, api); return; }
+        process(go, api);
       });
-      body.appendChild(go);
+      body.appendChild(h('div', { class: 'p-sticky-actions' }, go));
+      body.appendChild(h('div', { class: 'xs p-hint' }, '\uD83D\uDD12 Payments are simulated. No money moves.'));
+      // smart default: last method used, else wallet when it covers the amount
+      var pref = [u.lastPay, 'Wallet', 'UPI'].filter(function (m) { return m && rows[m] && !rows[m].low; })[0];
+      if (pref) rows[pref].row.click();
     });
+    function process(btnEl, api) {
+      if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Processing payment...'; }
+      setTimeout(function () {
+        var cur = S.user();
+        if (choice === 'Wallet' && !S.debit(cur, opts.paise, opts.title || 'Payment', 'Payment')) { if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Pay ' + rs(opts.paise); } UI.toast('Wallet balance changed. Choose another method.', 'error'); return; }
+        cur.lastPay = choice; if (S.save) S.save();
+        api.close(); P.paidAnim(opts.paise, opts.title || 'RideNova', choice, function () { opts.onPaid(choice); });
+      }, 900);
+    }
+    function pinStep(body, api) {
+      while (body.firstChild) body.removeChild(body.firstChild);
+      var pin = '';
+      var dots = h('div', { class: 'p-pin', role: 'group', 'aria-label': 'UPI PIN, 4 digits' }, [0, 1, 2, 3].map(function () { return h('i'); }));
+      var input = h('input', { type: 'password', inputmode: 'numeric', maxlength: 4, class: 'p-pin-input', 'aria-label': 'Enter 4-digit UPI PIN', autocomplete: 'off', name: 'upipin' });
+      var err = h('div', { class: 'rn-err', role: 'alert', hidden: true });
+      var paint = function () { Array.prototype.forEach.call(dots.children, function (d, i) { d.classList.toggle('on', i < pin.length); }); payBtn.disabled = pin.length !== 4; };
+      input.addEventListener('input', function () { pin = input.value.replace(/\D/g, '').slice(0, 4); input.value = pin; err.hidden = true; paint(); });
+      var key = function (k) { if (k === 'del') pin = pin.slice(0, -1); else if (pin.length < 4) pin += k; input.value = pin; err.hidden = true; paint(); if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) try { navigator.vibrate(8); } catch (e) { /* ignore */ } };
+      var pad = h('div', { class: 'p-keypad' }, ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map(function (k) { return k ? h('button', { type: 'button', class: 'p-key', 'aria-label': k === 'del' ? 'Delete' : k, on: { click: function () { key(k); } } }, k === 'del' ? '\u232B' : k) : h('span'); }));
+      var payBtn = P.btn('Pay ' + rs(opts.paise), '', function () { if (pin.length !== 4) { err.textContent = 'Enter all 4 digits.'; err.hidden = false; return; } payBtn.disabled = true; payBtn.textContent = 'Verifying with your bank...'; process(null, api); });
+      body.appendChild(h('div', { class: 'p-upi-head' }, [h('span', { class: 'xs' }, 'Paying'), h('b', null, opts.title || 'RideNova'), h('b', { class: 'big-num' }, rs(opts.paise)), h('span', { class: 'xs' }, 'From HDFC Bank \u2022\u2022 4521 \u00B7 ' + (upiId || 'you@okbank'))]));
+      body.appendChild(h('b', null, 'Enter 4-digit UPI PIN')); body.appendChild(dots); body.appendChild(input); body.appendChild(err);
+      body.appendChild(h('div', { class: 'banner warn' }, 'Never enter your UPI PIN to receive money. Demo: any 4 digits.'));
+      body.appendChild(pad); body.appendChild(payBtn); paint(); input.focus();
+    }
   };
-
+  // full-screen success tick (Google Pay style), then continue
+  P.paidAnim = function (paise, to, method, next) {
+    var scr = UI.q('#mock .scr'); if (!scr) { next(); return; }
+    var ref = (method === 'UPI' ? 'UPI ref ' : 'Txn ') + String(Date.now()).slice(-10);
+    var ov = h('div', { class: 'p-success', role: 'status', 'aria-live': 'assertive' }, [h('div', { class: 'p-tick' }, h('span', null, '\u2713')), h('b', { class: 'big-num' }, rs(paise) + ' paid'), h('span', null, 'to ' + to), h('span', { class: 'xs' }, method + ' \u00B7 ' + ref)]);
+    scr.appendChild(ov); if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) try { navigator.vibrate([20, 40, 20]); } catch (e) { /* ignore */ }
+    setTimeout(function () { ov.classList.add('out'); setTimeout(function () { ov.remove(); next(); }, 220); }, 1300);
+  };
   // ------------------------------------------------------------ bottom navigation
   var NAVS = [['home', 'R29', 'Home', 'home'], ['trips', 'R54', 'Trips', 'calendar'], ['savings', 'R49', 'Savings', 'percent'], ['wallet', 'R21', 'Wallet', 'wallet'], ['account', 'R28', 'Account', 'user']];
   var NAV_OF = { R29: 'home', R07: 'home', R54: 'trips', R20: 'trips', R49: 'savings', R22: 'savings', R21: 'wallet', R28: 'account', R24: 'account', R25: 'account', R26: 'account', R53: 'account' };

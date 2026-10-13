@@ -1,0 +1,44 @@
+/* RideNova - shared UX layer styles (ux.js) */
+.phone .ab .ib{position:relative}.phone .ab .ib::after{content:'';position:absolute;inset:-5px}
+.phone .bnav a{min-height:44px}
+.phone .btn{min-height:44px}
+.phone .li{min-height:44px}
+.phone .chip{min-height:32px}
+.rn-skel .li,.rn-skel .card-m,.rn-skel .p-restcard{position:relative;overflow:hidden}
+.rn-skel .li::after,.rn-skel .card-m::after,.rn-skel .p-restcard::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#EDF1F3 25%,#F8FAFB 50%,#EDF1F3 75%);background-size:200% 100%;animation:rn-shim .9s linear infinite;z-index:3;pointer-events:none}
+@keyframes rn-shim{from{background-position:200% 0}to{background-position:-200% 0}}
+.rn-ptr{position:absolute;left:50%;top:78px;width:30px;height:30px;border-radius:50%;border:3px solid var(--brand-soft);border-top-color:var(--brand);background:#fff;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.15);pointer-events:none}
+.rn-ptr.ready{border-top-color:var(--brand-2)}.rn-ptr.spin{animation:rn-spin .6s linear infinite}
+@keyframes rn-spin{to{transform:translate(-50%,40px) rotate(360deg)}}
+.rn-offline{position:absolute;left:10px;right:10px;top:40px;z-index:45;background:#3B4A54;color:#fff;font-size:12.5px;padding:8px 12px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.rn-undo{position:absolute;left:12px;right:12px;bottom:84px;z-index:46;background:#14212A;color:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.25);animation:rn-up .18s ease-out}
+.rn-undo span{flex:1}.rn-undo button{background:none;border:0;color:#7FE3C9;font-weight:800;font-size:13px;min-height:36px;padding:0 6px;cursor:pointer}
+@keyframes rn-up{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.rn-display .li .chips{flex-wrap:nowrap}
+/* payment: UPI PIN + success */
+.p-upi-head{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;padding:4px 0}
+.p-pin{display:flex;gap:14px;justify-content:center;padding:6px 0}
+.p-pin i{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted);transition:background .12s,transform .12s}
+.p-pin i.on{background:var(--ink);border-color:var(--ink);transform:scale(1.1)}
+.p-pin-input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.p-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.p-key{height:46px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:20px;font-weight:700;cursor:pointer}
+.p-key:active{background:var(--brand-soft)}
+.p-success{position:absolute;inset:0;z-index:60;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;animation:rn-fade .2s ease-out}
+.p-success.out{opacity:0;transition:opacity .2s}
+.p-tick{width:92px;height:92px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-size:48px;font-weight:800;animation:rn-pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes rn-pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes rn-fade{from{opacity:0}to{opacity:1}}
+/* dark mode extras */
+.rn-dark .phone .scr.dark .bnav,.rn-dark .phone .scr.dark .p-sheet,.rn-dark .phone .scr.dark .p-key,.rn-dark .phone .scr.dark .p-success,.rn-dark .phone .scr.dark .rn-input,.rn-dark .phone .scr.dark .inp .box{background:#15232C;color:#EAF1F5;border-color:#243641}
+.rn-dark .phone .scr.dark .ab .ib,.rn-dark .phone .scr.dark .chip:not(.on){background:#1E303B;color:#EAF1F5}
+.rn-dark .phone .scr.dark .p-pin i.on{background:#EAF1F5;border-color:#EAF1F5}
+.rn-dark .phone .scr.dark .rn-skel .li::after,.rn-dark .phone .scr.dark .rn-skel .card-m::after{background:linear-gradient(90deg,#1B2B35 25%,#243641 50%,#1B2B35 75%);background-size:200% 100%}
+@media (prefers-reduced-motion:reduce){.rn-skel .li::after,.rn-skel .card-m::after,.p-tick,.rn-ptr.spin,.rn-undo{animation:none}}.p-carousel{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;scrollbar-width:none}
+.p-carousel::-webkit-scrollbar{display:none}
+.p-offer{flex:0 0 78%;scroll-snap-align:start;border:0;border-radius:14px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:3px;color:#fff;background:linear-gradient(135deg,#0B7A68,#12A386);cursor:pointer;min-height:84px}
+.p-offer.amber{background:linear-gradient(135deg,#C97A00,#F2A516)}.p-offer.blue{background:linear-gradient(135deg,#2F5FD0,#5B8DEF)}
+.p-offer span{font-size:12px;opacity:.92}.p-offcode{margin-top:auto;font-weight:800;letter-spacing:.04em}
+.p-home-extra{display:flex;flex-direction:column;gap:10px}
+.p-refer{text-align:left;cursor:pointer;background:var(--brand-soft);border-color:transparent}
+.p-tip .chips{flex-wrap:wrap}
