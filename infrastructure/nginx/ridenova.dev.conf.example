@@ -1,0 +1,32 @@
+# Example reverse-proxy snippet for local/staging (Phase 10).
+# Copy and adapt; do not enable TLS termination secrets in Git.
+#
+# upstream API (Docker published 8000) and Vite portal (5173) are typical for dev.
+
+upstream ridenova_api {
+    server 127.0.0.1:8000;
+}
+
+server {
+    listen 8080;
+    server_name localhost;
+
+    # Do not proxy upload/backup paths from public roots.
+    location /api/ {
+        # If API is mounted at root, use / instead and adjust client base URLs.
+        proxy_pass http://ridenova_api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Request-ID $request_id;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        # WebSocket
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 3600s;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:5173;
+        proxy_set_header Host $host;
+    }
+}

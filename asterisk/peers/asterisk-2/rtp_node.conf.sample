@@ -1,0 +1,13 @@
+; Asterisk-2 node overlay. The firewall/NAT must expose this complete UDP range
+; for Asterisk-2's own media address. It is not a shared media VIP.
+
+[general]
+rtpstart = 10000
+rtpend = 20000
+icesupport = yes
+
+; Set the PJSIP transport external_media_address to:
+; <ASTERISK_2_PUBLIC_IP_OR_FQDN>
+;
+; Keep the range equal to Asterisk-1 only when each node has a distinct IP.
+; If both peers share a host-network namespace, allocate non-overlapping ranges.

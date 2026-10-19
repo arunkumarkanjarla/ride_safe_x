@@ -57,4 +57,5 @@ const reload = async () => { await sleep(1200); await page.goto(fileUrl(APP)); a
     await setv('phone', '9876543210'); await clk('[data-do*=driverLogin]'); await until(`document.querySelector('.p-sheet')`); await setv('dotp', '482716'); await clickText('.p-sheet button.btn', 'Verify'); await until(`/D05|D06/.test(RN.ui.sid)`); check('returning driver skips onboarding', true);
   });
   console.log('page errors:', J(page.errors.slice(0, 5))); console.log(fails ? 'FAILED ' + fails : 'ALL PASSED'); await b.close();
+  process.exit(fails ? 1 : 0);
 })();

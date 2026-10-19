@@ -1,0 +1,35 @@
+; AST-17 — Safe module policy additions for Japit
+; Append/merge carefully. Do NOT noload modules required by WebRTC, PJSIP,
+; queues, ODBC realtime, AMI, MixMonitor, ConfBridge, or CURL/func_odbc.
+;
+; Verified-safe unused stacks (already or additionally noload):
+
+noload => chan_sip.so
+noload => res_hep.so
+noload => res_hep_pjsip.so
+noload => res_hep_rtcp.so
+noload => app_voicemail_imap.so
+noload => app_voicemail_odbc.so
+noload => chan_alsa.so
+noload => chan_console.so
+noload => chan_skinny.so
+noload => chan_mgcp.so
+noload => chan_unistim.so
+noload => chan_oss.so
+noload => res_xmpp.so
+noload => res_snmp.so
+; Keep ARI loaded only if actively used:
+; noload => res_ari.so
+; noload => res_ari_channels.so
+; noload => res_ari_bridges.so
+; noload => res_ari_endpoints.so
+; noload => res_ari_events.so
+; noload => res_ari_playbacks.so
+; noload => res_ari_recordings.so
+; noload => res_ari_sounds.so
+; noload => res_stasis.so
+;
+; REQUIRED (do not noload):
+; chan_pjsip / res_pjsip* / codec_opus / app_queue / res_odbc / func_odbc /
+; res_config_odbc / app_mixmonitor / app_confbridge / res_http_websocket /
+; res_manager / res_curl / app_dial / app_stack

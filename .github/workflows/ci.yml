@@ -1,0 +1,94 @@
+name: CI
+
+# Phase 1: foundation checks that do NOT require private PostgreSQL credentials.
+# Local DB / PostGIS / Alembic checks run on developer machines with `.env`.
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+
+jobs:
+  backend-unit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.10"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip==25.0.1
+          pip install -r requirements.txt
+      - name: Unit tests (no external DB)
+        env:
+          RIDENOVA_ENV: test
+          RIDENOVA_STORAGE_PATH: /tmp/ridenova-uploads
+          DATABASE_URL: postgresql+psycopg://postgres:CHANGE_ME@localhost:5432/ride_safe_x
+          JWT_SECRET: TEST_ONLY_JWT_SECRET_VALUE_AT_LEAST_32_CHARS_LONG
+        run: |
+          pytest -q \
+            tests/test_health.py::test_health_ok \
+            tests/test_storage.py \
+            tests/test_config.py \
+            tests/test_security_phase10.py::test_production_rejects_sandbox_enabled \
+            tests/test_security_phase10.py::test_production_disables_sandbox_routes
+
+  compose-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose file
+        run: |
+          docker compose -f infrastructure/docker/docker-compose.dev.yml config >/tmp/compose.out
+          # Guard: no MinIO / no postgres service in active compose
+          if grep -Ei 'minio|image:.*postgres' /tmp/compose.out; then
+            echo "Forbidden service found in compose output" >&2
+            exit 1
+          fi
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.14.0"
+      - name: Contracts check
+        working-directory: packages/contracts
+        run: npm install && npm run check
+      - name: Web portal build
+        working-directory: apps/web_portal
+        run: npm install && npm run build
+      - name: Customer mobile typecheck
+        working-directory: apps/customer_mobile
+        run: npm install && npm run check
+      - name: Driver mobile typecheck
+        working-directory: apps/driver_mobile
+        run: npm install && npm run check
+      - name: Partner mobile typecheck
+        working-directory: apps/partner_mobile
+        run: npm install && npm run check
+
+  minio-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No MinIO runtime dependencies or services
+        run: |
+          set -e
+          # Detect actual MinIO usage (image, SDK, endpoint env), not "no MinIO" comments.
+          if grep -RIn --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv \
+            -E 'minio/minio|MINIO_ROOT_|MINIO_ENDPOINT|MINIO_ACCESS|from minio|import minio|require\(["'\'']minio' \
+            backend infrastructure apps packages workers .env.example 2>/dev/null; then
+            echo "MinIO runtime dependency/service found" >&2
+            exit 1
+          fi
+          if grep -Ei 'image:.*minio|container_name:.*minio' infrastructure/docker/docker-compose.dev.yml; then
+            echo "MinIO compose service found" >&2
+            exit 1
+          fi
+          echo "MinIO guard passed"

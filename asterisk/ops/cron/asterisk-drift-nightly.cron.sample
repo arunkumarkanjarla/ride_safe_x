@@ -1,0 +1,4 @@
+# Install as root with: crontab -e
+# Create /etc/default/japit-asterisk-drift with site-specific paths and optional
+# PROM_TEXTFILE_DIR (for example node_exporter's textfile collector directory).
+17 2 * * * . /etc/default/japit-asterisk-drift 2>/dev/null || true; /usr/local/libexec/japit-asterisk/check_config_drift.sh --git-repo "${GIT_REPO:-/opt/asterisk}" --live-dir "${LIVE_DIR:-/etc/asterisk}" --report-file "${REPORT_FILE:-/opt/asterisk-deployment/cluster/drift-report.json}" >>/var/log/japit-asterisk-drift.log 2>&1

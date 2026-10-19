@@ -1,0 +1,100 @@
+[global]
+type                                            = global
+;endpoint_identifier_order                       = ip,username,anonymous
+endpoint_identifier_order = username,ip,anonymous
+contact_expiration_check_interval               = 30
+debug                                           = no
+default_from_user                               = Asterisk
+default_outbound_endpoint                       = default_outbound_endpoint
+default_realm                                   = japithelpdesk-pro.dhanushhealthcare.com
+default_voicemail_extension                     = 8500
+disable_multi_domain                            = false
+ignore_uri_user_options                         = false
+keep_alive_interval                             = 90
+max_forwards                                    = 70
+max_initial_qualify_time                        = 0
+mwi_disable_initial_unsolicited                 = false
+mwi_tps_queue_high                              = 500
+mwi_tps_queue_low                               = -1
+norefersub                                      = yes
+;regcontext                                     = myregs
+send_contact_status_on_update_registration      = yes
+; global → SIP 503 when ANY taskprocessor hits high-water (Mediant OPTIONS
+; keepalives + stuck distributors blocked agent WebRTC REGISTER). Use none so
+; WebRTC REGISTER/INVITE stay available; monitor "core show taskprocessors".
+taskprocessor_overload_trigger                  = none
+unidentified_request_count                      = 5
+unidentified_request_period                     = 5
+unidentified_request_prune_interval             = 30
+use_callerid_contact                            = no
+user_agent                                      = Asterisk
+
+[transport-udp]
+type                            = transport
+protocol                        = udp
+bind                            = 0.0.0.0:5060
+; external_media_address          = SERVER_EXTERNAL_IP
+; external_signaling_address      = SERVER_EXTERNAL_IP
+external_media_address			= 192.168.20.26
+external_signaling_address		= 192.168.20.26
+local_net                       = 192.168.0.0/255.255.0.0
+local_net                       = 10.0.0.0/255.0.0.0
+local_net                       = 172.16.0.0/12
+local_net                       = 169.254.0.0/255.255.0.0
+tos                             = cs3
+
+; =============================
+; TRANSPORTS (Must exist)
+; =============================
+
+; WebSocket for WebRTC
+[transport-ws]
+type=transport
+protocol=ws
+;bind=0.0.0.0
+bind=0.0.0.0:8088
+allow_reload=yes
+
+external_media_address=202.53.95.194
+external_signaling_address=202.53.95.194
+local_net=127.0.0.1/32
+local_net=192.168.20.0/24
+local_net=10.10.10.0/23
+
+; Https for WebRTC
+;[transport-wss]
+;type=transport
+;protocol=wss
+;bind=0.0.0.0:8089
+;cert_file=/etc/asterisk/keys/asterisk.pem
+;priv_key_file=/etc/asterisk/keys/asterisk.key
+;method=tlsv1_2  ; Force a modern TLS version
+;external_media_address=202.53.95.194
+;external_signaling_address=202.53.95.194
+;external_media_address=as-callcenter.dhanushhealthcare.com
+;external_signaling_address=as-callcenter.dhanushhealthcare.com
+
+; Authentication (if Mediant requires credentials)
+[Mediant]
+type=endpoint
+transport=transport-udp
+; context=mediantinbound
+context=direct-inbound   ; Legacy realtime endpoint keeps this context; Japit hook is in direct-inbound
+disallow=all
+allow=alaw,ulaw
+aors=mediant-aor
+direct_media=no
+; Mediant trunk OPTIONS keepalives are unauthenticated; without this, challenges
+; stack up on pjsip distributors and trip overload → agent REGISTER 503.
+allow_unauthenticated_options=yes
+
+[mediant-aor]
+type=aor
+contact=sip:192.168.20.23:5060
+
+[Mediant-identify]
+type=identify
+endpoint=Mediant
+match=192.168.20.23
+
+#include pjsip_japit.conf

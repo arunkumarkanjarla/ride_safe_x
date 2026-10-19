@@ -1,0 +1,19 @@
+; Asterisk-2 AMI overlay. Merge with manager_japit.conf; preserve the shared
+; japitami permissions and event filters. Store the real secret outside Git.
+;
+; FastAPI is manually pinned to one AMI host. This node does not initiate or
+; accept automatic AMI failover.
+
+[general]
+enabled = yes
+bindaddr = <ASTERISK_2_PRIVATE_IP>
+bindport = 5038
+
+[japitami]
+; Use the same managed secret pattern as Asterisk-1, injected securely:
+secret = <MANAGED_AMI_SECRET>
+deny = 0.0.0.0/0.0.0.0
+; Permit only FastAPI's fixed source address or its explicitly approved subnet.
+permit = <FASTAPI_AMI_CLIENT_IP>/<NETMASK>
+; Retain the shared read/write classes and UserEvent filters from
+; manager_japit.conf. Do not broaden the ACL to 0.0.0.0/0.

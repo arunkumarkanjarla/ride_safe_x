@@ -71,4 +71,5 @@ const APPS = [
     } catch (e) { fails++; console.log('FAIL ' + app + ' ' + e.message); }
   }
   console.log(passes + ' passed, ' + fails + ' failed'); console.log(fails ? 'FAILED' : 'ALL PASSED'); await b.close();
+  process.exit(fails ? 1 : 0);
 })();

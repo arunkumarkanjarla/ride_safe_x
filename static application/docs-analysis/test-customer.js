@@ -42,4 +42,5 @@ module.exports = {};
   console.log('page errors:', JSON.stringify(page.errors.slice(0, 8)));
   console.log(fails ? 'FAILED ' + fails : 'ALL PASSED');
   await b.close();
+  process.exit(fails ? 1 : 0);
 })();

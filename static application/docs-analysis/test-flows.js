@@ -150,4 +150,5 @@ async function section(name, fn) { const e0 = page.errors.length; try { await fn
   console.log('page errors:', J(page.errors.slice(0, 8)));
   check('UPI PIN sheet used', PIN_SEEN > 0, PIN_SEEN); console.log(fails ? 'FAILED ' + fails : 'ALL PASSED');
   await b.close();
+  process.exit(fails ? 1 : 0);
 })();

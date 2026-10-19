@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Keepalived notify_fault hook. This sample intentionally performs no destructive fencing.
+# Configure an out-of-band STONITH/IPMI action only after operational review and testing.
+set -euo pipefail
+
+logger -t japit-keepalived "DRY RUN: VRRP fault on $(hostname -s); no fencing executed"
+exit 0

@@ -34,4 +34,5 @@ async function until(expr, t = 8000, why) { const end = Date.now() + t; while (D
   } catch (e) { fails++; console.log('FAIL ' + e.message); }
   check('no page errors', page.errors.length === 0, J(page.errors.slice(0, 3)).slice(0, 500));
   console.log(fails ? 'FAILED ' + fails : 'ALL PASSED'); await b.close();
+  process.exit(fails ? 1 : 0);
 })();

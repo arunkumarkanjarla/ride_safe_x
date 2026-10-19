@@ -1,0 +1,26 @@
+; Asterisk-2 node overlay. Merge these node-specific values into the matching
+; transports in /etc/asterisk/pjsip.conf after deploying the shared Git tree.
+; Do not add a SIP VIP. Use Asterisk-2's own reachable address.
+
+[transport-udp]
+type = transport
+protocol = udp
+bind = 0.0.0.0:5060
+external_media_address = <ASTERISK_2_PUBLIC_IP_OR_FQDN>
+external_signaling_address = <ASTERISK_2_PUBLIC_IP_OR_FQDN>
+local_net = <PRIVATE_NETWORK>/<NETMASK>
+tos = cs3
+
+; Enable only if this node terminates browser WebRTC on its own address.
+[transport-ws]
+type = transport
+protocol = ws
+bind = 0.0.0.0:8088
+allow_reload = yes
+external_media_address = <ASTERISK_2_PUBLIC_IP_OR_FQDN>
+external_signaling_address = <ASTERISK_2_PUBLIC_IP_OR_FQDN>
+local_net = <PRIVATE_NETWORK>/<NETMASK>
+
+; If WSS is enabled in the shared base configuration, set its external values
+; to the same Asterisk-2 identity and reference the shared certificate path.
+; Do not put private keys in Git.

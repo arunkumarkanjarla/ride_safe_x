@@ -1,0 +1,16 @@
+﻿{
+  "expo": {
+    "name": "Customer app",
+    "slug": "customer-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0B6E4F"
+    },
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#0B6E4F" } },
+    "platforms": ["ios", "android"]
+  }
+}

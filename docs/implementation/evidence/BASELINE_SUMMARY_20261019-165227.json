@@ -1,0 +1,50 @@
+﻿[
+    {
+        "suite":  "test-customer.js",
+        "processExit":  0,
+        "verdict":  "FAILED 1",
+        "lastLines":  "PASS splash -\u003e onboarding for a fresh browser | PASS phone field is empty for a new user | ERROR timeout: document.querySelector(\u0027#mock [data-err=phone]\u0027).textContent.length\u003e0 | sid=R03 toasts= | page errors: [] | FAILED 1"
+    },
+    {
+        "suite":  "test-driver.js",
+        "processExit":  0,
+        "verdict":  "FAILED 1",
+        "lastLines":  "PASS seats fill up live | PASS logout stays logged out | FAIL account + publish trip -\u003e timeout document.querySelector(\u0027.p-sheet\u0027) sid=D01 | page errors: [] | FAILED 1"
+    },
+    {
+        "suite":  "test-partner.js",
+        "processExit":  0,
+        "verdict":  "FAILED 2",
+        "lastLines":  "PASS onboarding validation | PASS application submitted | PASS application progresses to approved | page errors: [] | FAILED 2"
+    },
+    {
+        "suite":  "test-admin.js",
+        "processExit":  0,
+        "verdict":  "ALL PASSED",
+        "lastLines":  "PASS undo restores | PASS dispute note required | PASS dispute resolved | page errors: [] | ALL PASSED"
+    },
+    {
+        "suite":  "test-agent.js",
+        "processExit":  0,
+        "verdict":  "ALL PASSED",
+        "lastLines":  "PASS no dead buttons -\u003e [] | PASS workspace saved to localStorage -\u003e 13 | PASS still signed in after reload | PASS no page errors -\u003e [] | ALL PASSED"
+    },
+    {
+        "suite":  "test-ux.js",
+        "processExit":  0,
+        "verdict":  "ALL PASSED",
+        "lastLines":  "PASS agent-portal code auto-continues when complete | PASS agent-portal undo toast | PASS agent-portal no page errors -\u003e [] | 55 passed, 0 failed | ALL PASSED"
+    },
+    {
+        "suite":  "test-admin-control.js",
+        "processExit":  1,
+        "verdict":  "FAILED",
+        "lastLines":  "PASS driver page has no JS errors -\u003e [] | PASS partner page has no JS errors -\u003e [] | PASS agent page has no JS errors -\u003e [] | 45 passed, 2 failed | FAILED"
+    },
+    {
+        "suite":  "test-flows.js",
+        "processExit":  0,
+        "verdict":  "FAILED 13",
+        "lastLines":  "FAIL assistant + support -\u003e timeout: at R52 | sid=R58 toasts= | FAIL emergency + notifications + contacts -\u003e timeout: at R51 | sid=R58 toasts= | page errors: [] | FAIL UPI PIN sheet used -\u003e 0 | FAILED 13"
+    }
+]

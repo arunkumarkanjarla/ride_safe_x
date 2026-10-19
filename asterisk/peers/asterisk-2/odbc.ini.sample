@@ -1,0 +1,26 @@
+; /etc/odbc.ini on Asterisk-2. Keep database credentials in the protected
+; system ODBC configuration or secret manager, never in this repository.
+
+[japit_call_center-postgres]
+Description = Japit Call Center PostgreSQL primary
+Driver = PostgreSQL Unicode
+Servername = <POSTGRES_PRIMARY_HOST>
+Port = 5432
+Database = japit_call_center
+Username = <ASTERISK_ODBC_USERNAME>
+Password = <INJECTED_SECRET>
+SSLmode = require
+
+; Optional disaster-recovery target. This definition is intentionally
+; commented: enabling it alone does not switch Asterisk and does not create
+; automatic database failover.
+;
+;[japit_call_center-postgres-replica]
+;Description = Japit Call Center PostgreSQL replica (manual use only)
+;Driver = PostgreSQL Unicode
+;Servername = <POSTGRES_REPLICA_HOST>
+;Port = 5432
+;Database = japit_call_center
+;Username = <ASTERISK_ODBC_USERNAME>
+;Password = <INJECTED_SECRET>
+;SSLmode = require

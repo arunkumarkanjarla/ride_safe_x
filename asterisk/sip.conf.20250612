@@ -1,0 +1,78 @@
+[general]
+bindport=5060
+bindaddr=0.0.0.0
+context=default
+allowguest=no
+disallow=all
+allow=ulaw
+allow=alaw
+nat=force_rport,comedia
+canreinvite=no
+;registerattempts=0
+;registertimeout=20
+;registertimeout=900
+
+; Airtel SIP Trunk Registration (escaped special characters)
+;register => +914049583230@ap.ims.airtel.in:Dhanush%231@ap.ims.airtel.in/+914049583230
+register => +914049583230@ap.ims.airtel.in:Dhanush#1:+914049583230@ap.ims.airtel.in@10.5.109.131/+914049583230
+; -------- SIP TRUNK PEER CONFIG --------
+[airtelsip]
+type=peer
+username=+914049583230
+fromuser=+914049583230
+authuser=+914049583230
+secret=Dhanush#1
+fromdomain=ap.ims.airtel.in
+realm=ap.ims.airtel.in
+host=ap.ims.airtel.in
+outboundproxy=10.5.109.131
+context=from-internal
+defaultuser=+914049583230
+insecure=invite,port
+nat=force_rport,comedia
+externip=202.53.95.194
+localnet=192.168.0.0/255.255.0.0
+qualify=yes
+sendrpid=yes
+trustrpid=yes
+canreinvite=no
+registerattempts=0
+registertimeout=20
+expires=900
+disallow=all
+allow=ulaw
+allow=alaw
+
+; -------- EXTENSION 5001 --------
+[5001]
+username=5001
+secret=a12de3#
+accountcode=5001
+callerid="5001" <5001>
+mailbox=5001
+context=from-internal
+type=friend
+host=dynamic
+nat=force_rport,comedia
+qualify=yes
+canreinvite=no
+disallow=all
+allow=ulaw
+allow=alaw
+
+; -------- EXTENSION 5002 --------
+[5002]
+username=5002
+secret=a1wwe4#
+accountcode=5002
+callerid="5002" <5002>
+mailbox=5002
+context=from-internal
+type=friend
+host=dynamic
+nat=force_rport,comedia
+qualify=yes
+canreinvite=no
+disallow=all
+allow=ulaw
+allow=alaw

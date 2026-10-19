@@ -45,4 +45,5 @@ async function section(n, fn) { const e0 = page.errors.length; try { await fn();
     await until(`/Approved and live/.test(document.querySelector('#mock .body').textContent) && /Go to sign in/.test(document.querySelector('#mock .body').textContent)`, 70000, 'application approved'); check('application progresses to approved', true);
   });
   console.log('page errors:', J(page.errors.slice(0, 5))); console.log(fails ? 'FAILED ' + fails : 'ALL PASSED'); await b.close();
+  process.exit(fails ? 1 : 0);
 })();

@@ -1,0 +1,27 @@
+﻿{
+  "name": "@ridenova/customer-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "expo": "52.0.46",
+    "expo-location": "18.0.10",
+    "expo-secure-store": "14.0.1",
+    "expo-status-bar": "2.0.1",
+    "react": "18.3.1",
+    "react-native": "0.76.9"
+  },
+  "devDependencies": {
+    "@babel/core": "7.26.10",
+    "@types/react": "18.3.20",
+    "babel-preset-expo": "12.0.11",
+    "typescript": "5.8.3"
+  }
+}

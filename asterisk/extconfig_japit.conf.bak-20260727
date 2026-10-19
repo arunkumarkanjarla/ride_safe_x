@@ -1,0 +1,10 @@
+; Japit call center PJSIP + queue realtime (japit_call_center on 192.168.20.26).
+; Priority 2 — used when helpdesk DB has no matching ps_* row (e.g. 1002ws).
+
+ps_endpoints => odbc,japit_callcenter,japit_ps_endpoints,2
+ps_auths => odbc,japit_callcenter,japit_ps_auths,2
+ps_aors => odbc,japit_callcenter,japit_ps_aors,2
+ps_endpoint_id_ips => odbc,japit_callcenter,japit_ps_endpoint_id_ips,2
+
+queues => odbc,japit_callcenter,japit_queues,1
+queue_members => odbc,japit_callcenter,japit_queue_members,1

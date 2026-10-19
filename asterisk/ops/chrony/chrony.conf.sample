@@ -1,0 +1,26 @@
+# AST-18 chrony baseline — Asterisk / PostgreSQL / Application hosts
+# Install as /etc/chrony/chrony.conf (Ubuntu) or merge via Ansible.
+# Target: clock offset < 50 ms. Alert when offset > 200 ms.
+
+# Prefer multiple stratum sources; replace with corporate NTP if required.
+pool ntp.ubuntu.com iburst maxsources 3
+# server <CORPORATE_NTP_1> iburst
+# server <CORPORATE_NTP_2> iburst
+
+# Allow local admin queries; do not expose NTP publicly.
+bindcmdaddress 127.0.0.1
+bindcmdaddress ::1
+cmdallow 127.0.0.1
+
+# Dual-node ready: optionally serve NTP to the private PBX/DB/app VLAN only.
+# allow 10.10.10.0/23
+
+driftfile /var/lib/chrony/chrony.drift
+rtcsync
+makestep 1.0 -1
+keyfile /etc/chrony/chrony.keys
+leapsectz right/UTC
+logdir /var/log/chrony
+
+# Helpful for CDR/CEL/recording timestamp correlation across the pair.
+maxupdateskew 100.0

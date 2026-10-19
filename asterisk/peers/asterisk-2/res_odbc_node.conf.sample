@@ -1,0 +1,29 @@
+; Asterisk-2 res_odbc overlay.
+; Normal operation uses only the primary DSN. The alternate block is disabled
+; so res_odbc does not perform automatic failover or round-robin selection.
+
+[japit_callcenter]
+enabled => yes
+dsn => japit_call_center-postgres
+username => <ASTERISK_ODBC_USERNAME>
+password => <INJECTED_SECRET>
+pre-connect => yes
+pooling => no
+limit => 10
+sanitysql => select 1
+
+; Manual DR procedure only:
+; 1. Confirm the replica is current and writable for all Asterisk workloads.
+; 2. Change the active [japit_callcenter] dsn above to
+;    japit_call_center-postgres-replica.
+; 3. Run the approved maintenance/reload procedure and validate
+;    "odbc show" plus realtime queries.
+; 4. Record the change and revert deliberately after primary recovery.
+;
+;[japit_callcenter-replica-reference]
+;enabled => no
+;dsn => japit_call_center-postgres-replica
+;pre-connect => no
+
+; Do not define both DSNs as active handles for automatic switching. Asterisk
+; does not coordinate transactional consistency or failback for this workload.

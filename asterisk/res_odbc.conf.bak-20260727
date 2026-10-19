@@ -1,0 +1,10 @@
+[asterisk]
+enabled => yes
+dsn => asterisk-postgres
+username => postgres
+password => uba135#$
+pre-connect => yes
+pooling => no
+limit => 10
+
+#include res_odbc_japit.conf

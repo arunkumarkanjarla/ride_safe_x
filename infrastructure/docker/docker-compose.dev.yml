@@ -1,0 +1,113 @@
+# RideNova development stack — Windows Docker Desktop + host PostgreSQL.
+# NO postgres container. NO MinIO. NO live Asterisk.
+#
+# Usage (from repository root):
+#   docker compose -f infrastructure/docker/docker-compose.dev.yml --env-file .env up -d --build
+#
+# Published ports (local dev only):
+#   8000  API (FastAPI / WebSocket later)
+#   6379  Redis
+#   5672  RabbitMQ AMQP
+#   15672 RabbitMQ management UI
+
+name: ridenova-dev
+
+services:
+  redis:
+    image: redis:7.4.2-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13.7-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-ridenova}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-ridenova}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.api
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      RIDENOVA_STORAGE_PATH: /data/ridenova/uploads
+      # Containers must reach Windows PostgreSQL via host.docker.internal
+      RIDENOVA_DB_PREFER_HOST: "0"
+    ports:
+      - "8000:8000"
+    volumes:
+      # Windows host uploads directory
+      - D:/ridenova-data/uploads:/data/ridenova/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-fsS",
+          "http://127.0.0.1:8000/health",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.worker
+    restart: unless-stopped
+    # Explicit: outbox publisher + notification materialize (not Phase-1 heartbeat)
+    command: ["python", "-m", "workers.outbox_publisher"]
+    env_file:
+      - ../../.env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-ridenova}:${RABBITMQ_DEFAULT_PASS:-ridenova}@rabbitmq:5672/
+      RIDENOVA_DB_PREFER_HOST: "0"
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import os,pika; pika.BlockingConnection(pika.URLParameters(os.environ['RABBITMQ_URL'])).close()\"",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  redis_data:
+  rabbitmq_data:

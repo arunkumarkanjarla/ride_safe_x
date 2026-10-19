@@ -1,0 +1,37 @@
+; AST-17 — Production AMI baseline (sample)
+; Copy to /etc/asterisk/manager_japit.conf and inject secrets from a vault /
+; EnvironmentFile. Never commit real passwords.
+;
+; Least-privilege split:
+;   japitami          — application control (originate, queue config, events)
+;   japitami-readonly — monitoring / wallboard style reads only
+
+[general]
+enabled = yes
+timestampevents = yes
+; Bind to private management address only (never 0.0.0.0 in production).
+bindaddr = 127.0.0.1
+bindport = 5038
+; displayconnects = no
+
+[japitami]
+secret = <secret-manager:ASTERISK_AMI_SECRET>
+deny = 0.0.0.0/0.0.0.0
+permit = 127.0.0.1/255.255.255.255
+; permit = <FASTAPI_AMI_CLIENT_IP>/<NETMASK>
+; `config` is required so Admin UI queue strategy/timeout can UpdateConfig queues.conf.
+read = system,call,log,verbose,agent,user,reporting,cdr,dialplan,originate,command,security,config
+write = system,call,agent,user,reporting,originate,command,config
+writetimeout = 5000
+
+[japitami-readonly]
+secret = <secret-manager:ASTERISK_AMI_READONLY_SECRET>
+deny = 0.0.0.0/0.0.0.0
+permit = 127.0.0.1/255.255.255.255
+; permit = <MONITORING_SUBNET>/<NETMASK>
+read = system,call,log,verbose,agent,user,reporting,cdr,dialplan
+write =
+writetimeout = 5000
+; Phase 27: production manager_japit.conf eventfilter list must include RTCPSent/RTCPReceived
+; so the existing AMI worker can cache mid-call RTCP. This sample has no eventfilter
+; (receives all events). Do not add a restrictive filter list here.

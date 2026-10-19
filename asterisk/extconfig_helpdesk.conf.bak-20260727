@@ -1,0 +1,7 @@
+; Helpdesk / EHP PJSIP realtime (arun_asterisk on 192.168.20.68 via ODBC [asterisk]).
+; Priority 1 — checked first for endpoint/auth/aor lookups.
+
+ps_endpoints => odbc,asterisk,ps_endpoints,1
+ps_auths => odbc,asterisk,ps_auths,1
+ps_aors => odbc,asterisk,ps_aors,1
+ps_endpoint_id_ips => odbc,asterisk,ps_endpoint_id_ips,1

@@ -1,0 +1,20 @@
+; AST-17 — HTTP / WebSocket bind guidance (sample overlay)
+; WebRTC SIP WebSocket requires HTTP. Do not disable HTTP if WSS/WS is in use.
+; Harden bind address and terminate TLS at the reverse proxy where possible.
+
+[general]
+enabled=yes
+; Prefer private LAN or localhost + reverse-proxy. Avoid public 0.0.0.0 unless
+; a host firewall restricts 8088/8089 to the proxy only.
+bindaddr=127.0.0.1
+bindport=8088
+tlsenable=no
+; tlsbindaddr=0.0.0.0:8089
+; tlscertfile=/etc/asterisk/keys/asterisk.pem
+; tlsprivatekey=/etc/asterisk/keys/asterisk.key
+session_keep_alive=60000
+session_inactivity=30000
+; AST-30: 400 concurrent WebRTC sessions. Previous: 200. Rollback: 200.
+sessionlimit=512
+servername=
+enable_status=no

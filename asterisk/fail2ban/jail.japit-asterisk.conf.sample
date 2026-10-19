@@ -1,0 +1,36 @@
+# Fail2ban jail sample — Asterisk SIP / AMI (AST-17)
+# Install under /etc/fail2ban/jail.d/japit-asterisk.conf
+# Tune carefully: aggressive bans can block legitimate WebRTC proxy / Mediant IPs.
+# Always whitelist reverse-proxy, FastAPI, Mediant, and office SIP VLANs.
+
+[DEFAULT]
+ignoreip = 127.0.0.1/8 ::1
+             # <FASTAPI_SUBNET>
+             # <WEBRTC_PROXY_IP>
+             # <MEDIANT_PRIMARY_IP>
+             # <MEDIANT_SECONDARY_IP>
+             # <OFFICE_SIP_VLAN_CIDR>
+bantime = 1h
+findtime = 10m
+maxretry = 8
+backend = systemd
+
+[asterisk-sip]
+enabled = true
+filter = japit-asterisk-sip
+logpath = /var/log/asterisk/messages
+             /var/log/asterisk/full
+maxretry = 10
+findtime = 10m
+bantime = 30m
+action = %(action_)s
+
+[asterisk-ami]
+enabled = true
+filter = japit-asterisk-ami
+logpath = /var/log/asterisk/messages
+             /var/log/asterisk/full
+maxretry = 5
+findtime = 10m
+bantime = 1h
+action = %(action_)s

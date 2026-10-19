@@ -1,0 +1,17 @@
+; AST-17 — ARI baseline (sample)
+; ARI is optional for Japit. If unused, keep ari.conf users disabled and
+; HTTP bound only as required for WebSocket SIP (see http.conf guidance).
+;
+; If ARI is enabled for tooling, require auth + private bind + tight origins.
+
+[general]
+enabled = yes
+pretty = no
+; Restrict browser origins; never use * in production.
+allowed_origins = https://japithelpdesk-pro.example.com
+
+[japitari]
+type = user
+read_only = no
+password = <secret-manager:ASTERISK_ARI_PASSWORD>
+; Prefer password_format = crypt when managing via vault tooling.

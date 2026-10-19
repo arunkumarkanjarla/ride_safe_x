@@ -1,0 +1,40 @@
+# AST-05 SIP VIP backup node. Keep this peer configuration reciprocal with the master.
+global_defs {
+  router_id ASTERISK_2
+  enable_script_security
+  script_user root
+}
+
+vrrp_script chk_asterisk_health {
+  script "/usr/local/libexec/japit/check_asterisk_health.sh"
+  interval 2
+  timeout 4
+  fall 2
+  rise 2
+  weight -80
+}
+vrrp_script chk_pjsip_options {
+  script "/usr/local/libexec/japit/check_pjsip_options.sh"
+  interval 3
+  timeout 4
+  fall 2
+  rise 2
+  weight -20
+}
+
+vrrp_instance VI_JAPIT_SIP {
+  state BACKUP
+  interface eth0
+  virtual_router_id 51
+  priority 100
+  advert_int 1
+  nopreempt
+  authentication { auth_type PASS; auth_pass CHANGE_ME }
+  unicast_src_ip 10.10.10.12
+  unicast_peer { 10.10.10.11 }
+  virtual_ipaddress { 10.10.10.50/24 dev eth0 label eth0:japit-sip }
+  track_script { chk_asterisk_health chk_pjsip_options }
+  notify_master "/usr/local/libexec/japit/notify_master.sh"
+  notify_backup "/usr/local/libexec/japit/notify_backup.sh"
+  notify_fault "/usr/local/libexec/japit/fence_unhealthy.sh"
+}

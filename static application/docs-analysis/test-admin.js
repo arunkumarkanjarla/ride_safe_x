@@ -85,4 +85,5 @@ const typeSearch = (v) => ev(`(()=>{const i=document.querySelector('#mock .a-sea
     await setv('dnote', 'Route was 2 km longer than planned.'); await clickText('.a-drawer button', 'Refund half'); await sleep(900); check('dispute resolved', !(await ev(`!!document.querySelector('.a-drawer')`)));
   });
   console.log('page errors:', J(page.errors.slice(0, 5))); console.log(fails ? 'FAILED ' + fails : 'ALL PASSED'); await b.close();
+  process.exit(fails ? 1 : 0);
 })();
