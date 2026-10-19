@@ -68,7 +68,7 @@
       var from = P.field({ name: 'from', label: 'From', select: names, value: lt.from, on: { change: function () { lt.from = UI.val('from'); } } });
       var to = P.field({ name: 'to', label: 'To', select: names, value: lt.to, on: { change: function () { lt.to = UI.val('to'); } } });
       body.appendChild(from); body.appendChild(to);
-      body.appendChild(h('button', { type: 'button', class: 'chip p-swap', on: { click: function () { var a = UI.val('from'), b = UI.val('to'); if (a.trim() === b.trim()) { UI.toast(a.trim() ? 'Pickup and destination are the same.' : 'Enter both places to swap them.', 'info'); return; } from.input.value = b; to.input.value = a; lt.from = b; lt.to = a; } } }, [ic('repeat', 14), ' Swap']));
+      body.appendChild(h('button', { type: 'button', class: 'chip p-swap', on: { click: function () { var a = UI.val('from'), b = UI.val('to'); if (a.trim() === b.trim()) { UI.toast(a.trim() ? 'Pickup and destination are the same.' : 'Enter both places to swap them.', 'info'); return; } from.input.value = b; to.input.value = a; lt.from = b; lt.to = a; UI.toast('Swapped: ' + b.trim() + ' \u2192 ' + a.trim(), 'info'); } } }, [ic('repeat', 14), ' Swap']));
       body.appendChild(P.field({ name: 'date', label: 'Travel date', type: 'date', value: lt.date, min: P.isoDate(Date.now()), on: { change: function () { lt.date = UI.val('date'); } } }));
       body.appendChild(retBox);
       body.appendChild(h('div', { class: 'kv' }, [h('span', null, 'Passengers'), P.stepper(lt.pax, function (n) { lt.pax = n; }, 1, 6)]));

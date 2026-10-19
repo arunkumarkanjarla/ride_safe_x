@@ -40,3 +40,6 @@ Backup of the five apps before any edit: D:\git\ride_safe_x_backup_20261012-0746
 - 09:06 crawls: driver 29 screens 0 dead 0 errors; partner 11 screens 0 dead 0 errors. Admin+customer running. Suites started.
 - 09:13 8 suites ALL PASS (43/11/26/17/27/9/55/51). Customer crawl 60 screens, 0 page errors, 1 timeout (R29, ran alongside suites), dead=self-links+known SOS/Swap. Admin crawl 0 errors but most screens timed out under load -> re-running alone PER=45000.
 - 09:24 STOP (deadline). PENDING: admin crawl re-run (PER=45000, alone) still running -> check crawl-admin.txt; customer R29 timed out once under load (re-crawl alone if needed). No code changes this session.
+- 14 Oct 06:30 admin crawl (09:24 run) complete: 31 screens, 0 timeouts, 0 page errors, 26 dead = all self-links. R32 Swap: worked but gave no visible/announced feedback -> added 'Swapped: X -> Y' toast (product-trips.js). Next: R29 crawl, suites.
+- 06:40 R29+R32 re-crawl alone: 0 timeouts, 0 errors, only R29 self-link; Swap no longer dead. Running 8 suites.
+- 06:47 8 suites ALL PASS (43/11/26/17/27/9/55/51). Round 3 leftovers closed. Scratch probe: docs-analysis\probe-swap.js (not deleted per rules).

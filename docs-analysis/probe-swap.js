@@ -1,0 +1,10 @@
+const path=require('path');const {Browser,fileUrl,sleep}=require('../architecture-workflow/tests/browser/cdp');
+const W='new Promise(r=>{const t=setInterval(()=>{if(window.RN&&RN.ui&&RN.ui.sid&&RN.store){clearInterval(t);r(1)}},50)})';
+(async()=>{const b=await Browser.launch();const p=await b.newPage();const U=fileUrl(path.resolve(__dirname,'../customer-app/index.html'));
+await p.goto(U);await p.eval('localStorage.clear()');await p.goto(U);await p.eval(W);await sleep(500);
+await p.eval("RN.store.signIn('9848004321')");await sleep(500);await p.goto(U);await p.eval(W);await sleep(1200);
+await p.eval("location.hash='#/R32'");await sleep(1200);console.log('sid',await p.eval('RN.ui.sid'));
+const t=async(lbl)=>console.log(lbl,await p.eval(`(()=>{const n0=document.querySelectorAll('.rn-toast').length;const f=document.querySelector('#mock [name=from]'),t=document.querySelector('#mock [name=to]');const r0=[f&&f.value,t&&t.value];const s=document.querySelector('#mock .p-swap');if(!s)return 'no swap';s.click();return new Promise(r=>setTimeout(()=>r(JSON.stringify({r0,r1:[f&&f.value,t&&t.value],toasts:document.querySelectorAll('.rn-toast').length-n0,txt:[...document.querySelectorAll('.rn-toast')].map(x=>x.textContent).slice(-2)})),300))})()`));
+await t('initial');await t('again');
+await p.eval(`(()=>{document.querySelector('#mock [name=from]').value='Ameerpet';document.querySelector('#mock [name=to]').value='Kondapur';})()`);await t('diff');await t('diff2');
+await b.close();process.exit(0)})().catch(e=>{console.log('ERR',e.message.slice(0,200));process.exit(1)});
