@@ -191,37 +191,73 @@
     });
   });
   var PTYPES = [['Documents', 'Documents \u00B7 up to 500 g', 0], ['Small', 'Small \u00B7 up to 5 kg', 1], ['Medium', 'Medium \u00B7 up to 15 kg', 2]];
+  var MEALS = [
+    { id: 'Breakfast', window: '7:00–10:30 AM', tag: 'MORNING', factor: 0.95 },
+    { id: 'Lunch', window: '12:00–3:00 PM', tag: 'PEAK', factor: 1.1 },
+    { id: 'Dinner', window: '7:00–10:30 PM', tag: 'EVENING', factor: 1.05 }
+  ];
+  function mealHint() {
+    var hr = new Date().getHours();
+    if (hr >= 6 && hr < 11) return 'Breakfast';
+    if (hr >= 11 && hr < 16) return 'Lunch';
+    if (hr >= 16 && hr < 23) return 'Dinner';
+    return 'Lunch';
+  }
   P.screen('R47', {
     title: 'Send a parcel', back: 'R29',
-    reset: function (v) { v.scope = 'Within city'; v.ptype = 'Small'; v.opt = 0; v.insure = false; v.toCity = 'Mysuru'; },
+    reset: function (v) { v.scope = 'Within city'; v.ptype = 'Small'; v.opt = 0; v.insure = false; v.toCity = 'Mysuru'; v.meal = mealHint(); },
     build: function (body, v) {
       var u = S.user(), home = (u.saved.home && u.saved.home.area) || 'Road 12, Banjara Hills';
-      body.appendChild(P.chips(['Within city', 'To another city'], v.scope, function (s) { v.scope = s; v.opt = 0; draw(); }));
+      body.appendChild(P.chips(['Within city', 'To another city', 'Home food'], v.scope, function (s) { v.scope = s; v.opt = 0; if (s === 'Home food') { v.ptype = 'Small'; v.meal = mealHint(); } draw(); }));
+      var mealBox = h('div'); body.appendChild(mealBox);
       body.appendChild(P.sec('PICKUP'));
       body.appendChild(P.field({ name: 'pfrom', label: 'Pick-up address', value: home, maxlength: 80 }));
       body.appendChild(h('div', { class: 'row2' }, [P.field({ name: 'sname', label: 'Sender name', value: u.name, maxlength: 40 }), P.field({ name: 'sphone', label: 'Sender phone', type: 'tel', inputmode: 'numeric', value: u.phone, maxlength: 10 })]));
       body.appendChild(P.sec('DELIVERY'));
       var cityBox = h('div'); body.appendChild(cityBox);
-      body.appendChild(P.field({ name: 'pto', label: 'Delivery address', maxlength: 80, placeholder: 'House, street, area' }));
+      body.appendChild(P.field({ name: 'pto', label: 'Delivery address', maxlength: 80, placeholder: v.scope === 'Home food' ? 'Office / home where food should arrive' : 'House, street, area' }));
       body.appendChild(h('div', { class: 'row2' }, [P.field({ name: 'rname', label: 'Receiver name', maxlength: 40 }), P.field({ name: 'rphone', label: 'Receiver phone', type: 'tel', inputmode: 'numeric', maxlength: 10 })]));
       body.appendChild(P.sec('PARCEL'));
-      body.appendChild(P.chips(PTYPES.map(function (t) { return [t[0], t[1]]; }), v.ptype, function (t) { v.ptype = t; draw(); }));
-      body.appendChild(P.field({ name: 'what', label: 'What is inside? (required)', maxlength: 60, placeholder: 'e.g. Books, documents, a gift' }));
+      var typeBox = h('div'); body.appendChild(typeBox);
+      body.appendChild(P.field({ name: 'what', label: 'What is inside? (required)', maxlength: 60, placeholder: 'e.g. Home lunch dabba, books, documents' }));
       body.appendChild(h('div', { class: 'kv' }, [h('span', null, 'Add insurance up to \u20B95,000 (+\u20B920)'), P.toggle(false, function (on) { v.insure = on; draw(); }, 'Insurance')]));
       var opts = h('div', { class: 'p-opts' }), total = h('div', { class: 'kv' }); body.appendChild(P.sec('CHOOSE A SERVICE')); body.appendChild(opts); body.appendChild(total);
       var go = P.btn('Book parcel', '', submit); body.appendChild(go);
-      function km() { return v.scope === 'Within city' ? 3 + Math.floor(P.seeded(UI.val('pfrom') + UI.val('pto'))() * 12) : P.roadKm('Hyderabad', v.toCity); }
+      function km() { return v.scope === 'To another city' ? P.roadKm('Hyderabad', v.toCity) : 3 + Math.floor(P.seeded(UI.val('pfrom') + UI.val('pto'))() * 12); }
       function services() {
-        var k = km(), w = [1, 1.4, 2.1][PTYPES.map(function (t) { return t[0]; }).indexOf(v.ptype)];
+        var k = km(), w = [1, 1.4, 2.1][Math.max(0, PTYPES.map(function (t) { return t[0]; }).indexOf(v.ptype))];
+        if (v.scope === 'Home food') {
+          var m = MEALS.filter(function (x) { return x.id === v.meal; })[0] || MEALS[1];
+          var f = m.factor;
+          return [
+            ['Meal express', 'HOT', 'Bike \u00B7 ' + m.id.toLowerCase() + ' slot ' + m.window + ' \u00B7 ~' + (20 + Math.round(k * 2.2)) + ' min', Math.round((55 + k * 8) * f), 25],
+            ['Scheduled meal', m.tag, 'Guaranteed drop in the ' + m.id.toLowerCase() + ' window (' + m.window + ')', Math.round((40 + k * 5.5) * f), 90],
+            ['Saver meal', 'CHEAPEST', 'Shared bike runs for home food around ' + m.window.split('\u2013')[0], Math.round((28 + k * 4) * f), 120]
+          ];
+        }
         if (v.scope === 'Within city') return [['Express courier', 'FAST', 'Bike \u00B7 delivered in about ' + (30 + k * 3) + ' min', Math.round((60 + k * 9) * w), 45], ['Standard', '', 'Auto \u00B7 within 3 hours', Math.round((45 + k * 6) * w), 180], ['Evening slot', 'CHEAPEST', 'Delivered today 6-9 PM', Math.round((30 + k * 4) * w), 360]];
         return [['Express courier', 'FAST', 'Dedicated cab \u00B7 delivered in about ' + P.mins(Math.round(k / 55 * 60)), Math.round((k * 7.5 + 150) * w), 0], ['With a traveller', 'CHEAPEST', 'Shared cab leaving tomorrow 7:00 \u00B7 by evening', Math.round((k * 0.45 + 40) * w), 1], ['Bus parcel', '', 'Tomorrow 10 AM \u00B7 collect at the bus stand', Math.round((k * 0.3 + 40) * w), 1]];
       }
       function draw() {
-        P.clear(cityBox); if (v.scope !== 'Within city') cityBox.appendChild(P.field({ name: 'pcity', label: 'Delivery city', select: P.CITIES.map(function (c) { return c.n; }).filter(function (n) { return n !== 'Hyderabad'; }), value: v.toCity, on: { change: function () { v.toCity = UI.val('pcity'); draw(); } } }));
+        P.clear(mealBox);
+        if (v.scope === 'Home food') {
+          mealBox.appendChild(P.banner('info', 'Home food parcels for breakfast, lunch and dinner slots. Ideal for tiffin / dabba runs.', 'food'));
+          mealBox.appendChild(P.sec('MEAL TIME'));
+          mealBox.appendChild(P.chips(MEALS.map(function (m) { return [m.id, m.id + ' \u00B7 ' + m.window]; }), v.meal, function (m) { v.meal = m; v.opt = 0; draw(); }));
+        }
+        P.clear(cityBox); if (v.scope === 'To another city') cityBox.appendChild(P.field({ name: 'pcity', label: 'Delivery city', select: P.CITIES.map(function (c) { return c.n; }).filter(function (n) { return n !== 'Hyderabad'; }), value: v.toCity, on: { change: function () { v.toCity = UI.val('pcity'); draw(); } } }));
+        P.clear(typeBox);
+        if (v.scope === 'Home food') {
+          typeBox.appendChild(P.chips([['Small', 'Tiffin / dabba \u00B7 up to 3 kg'], ['Medium', 'Family pack \u00B7 up to 8 kg']], v.ptype === 'Documents' ? 'Small' : (v.ptype === 'Medium' ? 'Medium' : 'Small'), function (t) { v.ptype = t; draw(); }));
+        } else {
+          typeBox.appendChild(P.chips(PTYPES.map(function (t) { return [t[0], t[1]]; }), v.ptype, function (t) { v.ptype = t; draw(); }));
+        }
         P.clear(opts); var sv = services();
-        sv.forEach(function (s, i) { opts.appendChild(P.opt({ icon: i === 1 && v.scope !== 'Within city' ? 'users' : 'box', title: s[0] + (s[1] ? '  ' + s[1] : ''), sub: s[2], price: rs(s[3] * 100), on: i === v.opt, onClick: function () { v.opt = i; draw(); } })); });
+        if (v.opt >= sv.length) v.opt = 0;
+        sv.forEach(function (s, i) { opts.appendChild(P.opt({ icon: v.scope === 'Home food' ? 'food' : (i === 1 && v.scope === 'To another city' ? 'users' : 'box'), title: s[0] + (s[1] ? '  ' + s[1] : ''), sub: s[2], price: rs(s[3] * 100), on: i === v.opt, onClick: function () { v.opt = i; draw(); } })); });
         var base = sv[v.opt][3] * 100 + (v.insure ? 2000 : 0), d = P.discount('parcel', base); v.total = base - d.paise; v.sv = sv[v.opt]; v.disc = d;
-        P.clear(total); total.appendChild(h('span', null, d.paise ? 'Total (coupon ' + d.code + ' applied)' : 'Total')); total.appendChild(h('b', { class: 'x-font-size-18px' }, rs(v.total))); go.textContent = 'Book parcel \u00B7 ' + rs(v.total);
+        P.clear(total); total.appendChild(h('span', null, d.paise ? 'Total (coupon ' + d.code + ' applied)' : 'Total')); total.appendChild(h('b', { class: 'x-font-size-18px' }, rs(v.total)));
+        go.textContent = (v.scope === 'Home food' ? 'Book home food \u00B7 ' : 'Book parcel \u00B7 ') + rs(v.total);
       }
       function submit() {
         P.clearErrors(); var bad = false, g = function (n) { return UI.val(n).trim(); };
@@ -233,8 +269,15 @@
         if (!S.validPhone(g('rphone'))) { UI.fieldError('rphone', 'Enter a valid 10-digit mobile.'); bad = true; } else if (S.digits(g('rphone')) === S.digits(g('sphone'))) { UI.fieldError('rphone', 'Receiver number must differ from the sender.'); bad = true; }
         if (g('what').length < 3) { UI.fieldError('what', 'Tell us what is inside.'); bad = true; }
         if (bad) { UI.toast('Please fix the highlighted fields.', 'error'); return; }
-        var pid = 'PRC-' + (88200 + Math.floor(Math.random() * 800)), city = v.scope === 'Within city' ? 'Hyderabad' : v.toCity, otp = String(1000 + Math.floor(Math.random() * 9000));
-        P.checkout({ title: 'Parcel to ' + g('rname'), paise: v.total + (v.disc.paise || 0), cat: 'parcel', allow: ['Wallet', 'UPI', 'Card'], booking: { type: 'parcel', pid: pid, title: 'Parcel to ' + g('rname') + ', ' + city, sub: v.sv[0] + ' \u00B7 ' + v.ptype, when: Date.now(), stepMs: v.scope === 'Within city' ? 30000 : 40000, notified: 0, otp: otp, carrier: v.sv[0], details: [['Parcel ID', pid], ['From', g('pfrom') + ' (' + g('sname') + ' ' + S.pretty(g('sphone')) + ')'], ['To', g('pto') + ', ' + city + ' (' + g('rname') + ' ' + S.pretty(g('rphone')) + ')'], ['Contents', g('what') + ' \u00B7 ' + v.ptype], ['Service', v.sv[0] + ' \u00B7 ' + v.sv[2]], ['Insurance', v.insure ? 'Up to \u20B95,000' : 'None'], ['Receiver OTP', otp]] }, after: function (b) { P.nav.parcel = b.id; }, goto: 'R48' });
+        var pid = 'PRC-' + (88200 + Math.floor(Math.random() * 800));
+        var city = v.scope === 'To another city' ? v.toCity : 'Hyderabad';
+        var otp = String(1000 + Math.floor(Math.random() * 9000));
+        var meal = MEALS.filter(function (x) { return x.id === v.meal; })[0];
+        var title = v.scope === 'Home food' ? (v.meal + ' meal to ' + g('rname')) : ('Parcel to ' + g('rname'));
+        var sub = v.scope === 'Home food' ? (v.sv[0] + ' \u00B7 ' + v.meal + ' \u00B7 ' + (meal ? meal.window : '')) : (v.sv[0] + ' \u00B7 ' + v.ptype);
+        var details = [['Parcel ID', pid], ['From', g('pfrom') + ' (' + g('sname') + ' ' + S.pretty(g('sphone')) + ')'], ['To', g('pto') + ', ' + city + ' (' + g('rname') + ' ' + S.pretty(g('rphone')) + ')'], ['Contents', g('what') + ' \u00B7 ' + v.ptype], ['Service', v.sv[0] + ' \u00B7 ' + v.sv[2]], ['Insurance', v.insure ? 'Up to \u20B95,000' : 'None'], ['Receiver OTP', otp]];
+        if (v.scope === 'Home food') details.splice(4, 0, ['Meal slot', v.meal + (meal ? ' \u00B7 ' + meal.window : '')]);
+        P.checkout({ title: title, paise: v.total + (v.disc.paise || 0), cat: 'parcel', allow: ['Wallet', 'UPI', 'Card'], booking: { type: 'parcel', pid: pid, title: title + (v.scope === 'Home food' ? '' : ', ' + city), sub: sub, when: Date.now(), stepMs: v.scope === 'To another city' ? 40000 : 25000, notified: 0, otp: otp, carrier: v.sv[0], meal: v.scope === 'Home food' ? v.meal : '', details: details }, after: function (b) { P.nav.parcel = b.id; }, goto: 'R48' });
       }
       draw();
     }

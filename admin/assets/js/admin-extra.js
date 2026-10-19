@@ -40,6 +40,51 @@
   // permission-checked, audit-logged change; resolves true when allowed
   function act(perm, label, event, target, btn) { return exec('admin.action', { perm: perm, label: label, event: event, target: target, id: target + ':' + label + ':' + Date.now() }, btn || null).then(function (r) { return !!(r && r.ok); }); }
 
+  /* Bridge legacy A-screen mutations into canonical RNPC ops (ridenova.ops.v1).
+     Keeps admin.v1 samples for offline demo tables; does not reset or overwrite unrelated ops data. */
+  function who() { return (S.session && (S.session.email || S.session.role)) || role() || 'admin'; }
+  function opsOk() { return !!(window.RNPC && typeof RNPC.opsUpdate === 'function'); }
+  function pushWallet(phone, name, paise, note, kind, booking, source) {
+    if (!opsOk() || !phone || !paise) return null;
+    var id = null;
+    RNPC.opsUpdate(function (o) {
+      id = RNPC.uid('WA');
+      var c = o.customers[phone] = o.customers[phone] || {};
+      c.name = name || c.name || '';
+      c.seen = Date.now();
+      if (typeof c.walletPaise !== 'number') c.walletPaise = 0;
+      c.walletPaise += paise;
+      o.wallet.unshift({ id: id, phone: phone, paise: paise, note: note, kind: kind || 'Adjustment', booking: booking || '', at: Date.now(), by: who(), source: source || 'admin-portal', applied: false });
+    }, { by: who(), role: role(), action: kind === 'Refund' ? 'wallet.refund' : 'wallet.adjust', detail: note || '' });
+    return id;
+  }
+  function pushBlock(phone, name, blocked, reason) {
+    if (!opsOk() || !phone) return;
+    RNPC.opsUpdate(function (o) {
+      var c = o.customers[phone] = o.customers[phone] || {};
+      c.name = name || c.name || '';
+      c.blocked = !!blocked;
+      c.reason = blocked ? (reason || 'Blocked from Admin riders (A05)') : '';
+      c.seen = Date.now();
+    }, { by: who(), role: role(), action: blocked ? 'customer.block' : 'customer.unblock', detail: (blocked ? 'Blocked ' : 'Unblocked ') + phone });
+  }
+  function overlayOps(r) {
+    if (!opsOk() || !RNPC.ops.customers) return;
+    var c = RNPC.ops.customers[r.phone]; if (!c) return;
+    if (c.blocked) r.status = 'Blocked';
+    else if (r.status === 'Blocked' && c.blocked === false) r.status = 'Active';
+  }
+  function liveRiders() {
+    if (!opsOk()) return [];
+    var syn = {}; S.riders.forEach(function (r) { syn[r.phone] = 1; });
+    return Object.keys(RNPC.ops.customers).filter(function (ph) { return !syn[ph]; }).map(function (ph) {
+      var c = RNPC.ops.customers[ph];
+      return { id: 'LIVE-' + String(ph).slice(-4), name: c.name || 'Customer', phone: ph, city: 'Live', rides: c.bookings || 0, rating: '—', wallet: c.walletPaise || 0, status: c.blocked ? 'Blocked' : 'Active', since: new Date(c.seen || Date.now()).getFullYear(), live: true };
+    });
+  }
+  function allRiders() { S.riders.forEach(overlayOps); return S.riders.concat(liveRiders()); }
+  function phoneForRiderName(name) { var r = S.riders.filter(function (x) { return x.name === name; })[0]; return r ? r.phone : ''; }
+
   // ---------------------------------------------------------------- building blocks
   function btn(label, cls, fn) { return h('button', { type: 'button', class: 'dbtn ' + (cls || ''), on: { click: fn } }, label); }
   function st(t, kind) { return h('span', { class: 'st ' + (kind || '') }, t); }
@@ -105,18 +150,39 @@
 
   // ---------------------------------------------------------------- A05 riders
   screen('A05', function (dc, redraw) {
-    var q = f('A05', 'q', ''), fl = f('A05', 'f', 'All'), rows = S.riders.filter(function (r) { return (fl === 'All' || r.status === fl) && (!q || (r.name + r.id + r.city).toLowerCase().indexOf(q.toLowerCase()) >= 0); });
-    dc.appendChild(kpis([['Riders', S.riders.length.toLocaleString('en-IN'), 'synthetic sample'], ['Active', String(S.riders.filter(function (r) { return r.status === 'Active'; }).length)], ['Flagged', String(S.riders.filter(function (r) { return r.status === 'Flagged'; }).length)], ['Blocked', String(S.riders.filter(function (r) { return r.status === 'Blocked'; }).length)]]));
-    dc.appendChild(h('div', { class: 'a-bar' }, [chips(['All', 'Active', 'Flagged', 'Blocked'], fl, function (o) { setf('A05', 'f', o); }), h('span', { class: 'sp' }), search('Search name, ID or city', q, function (v) { filt.A05.q = v; draw('A05'); })]));
-    dc.appendChild(card('Riders (' + rows.length + ')', null, rows.length ? table([['ID', function (r) { return r.id; }], ['Name', function (r) { return r.name; }], ['Phone', function (r) { return r.reveal ? '+91 ' + r.phone : mask(r.phone); }], ['City', function (r) { return r.city; }], ['Rides', function (r) { return String(r.rides); }], ['Rating', function (r) { return '\u2605 ' + r.rating; }], ['Wallet', function (r) { return money(r.wallet); }], ['Status', function (r) { return st(r.status, r.status === 'Active' ? 'ok' : r.status === 'Blocked' ? 'bad' : 'warn'); }]], rows, riderDrawer) : h('div', { class: 'a-empty' }, 'No riders match. Clear the search or filter.')));
+    var pool = allRiders(), q = f('A05', 'q', ''), fl = f('A05', 'f', 'All'), rows = pool.filter(function (r) { return (fl === 'All' || r.status === fl) && (!q || (r.name + r.id + r.city + r.phone).toLowerCase().indexOf(q.toLowerCase()) >= 0); });
+    dc.appendChild(kpis([['Riders', pool.length.toLocaleString('en-IN'), 'sample + live ops'], ['Active', String(pool.filter(function (r) { return r.status === 'Active'; }).length)], ['Flagged', String(pool.filter(function (r) { return r.status === 'Flagged'; }).length)], ['Blocked', String(pool.filter(function (r) { return r.status === 'Blocked'; }).length)]]));
+    dc.appendChild(h('div', { class: 'a-bar' }, [chips(['All', 'Active', 'Flagged', 'Blocked'], fl, function (o) { setf('A05', 'f', o); }), h('span', { class: 'sp' }), search('Search name, ID, city or phone', q, function (v) { filt.A05.q = v; draw('A05'); })]));
+    dc.appendChild(card('Riders (' + rows.length + ')', null, rows.length ? table([['ID', function (r) { return r.id; }], ['Name', function (r) { return r.name; }], ['Phone', function (r) { return r.reveal ? '+91 ' + r.phone : mask(r.phone); }], ['City', function (r) { return r.city; }], ['Rides', function (r) { return String(r.rides); }], ['Rating', function (r) { return r.rating === '—' ? '—' : '\u2605 ' + r.rating; }], ['Wallet', function (r) { return money(r.wallet); }], ['Status', function (r) { return st(r.status, r.status === 'Active' ? 'ok' : r.status === 'Blocked' ? 'bad' : 'warn'); }]], rows, riderDrawer) : h('div', { class: 'a-empty' }, 'No riders match. Clear the search or filter.')));
   });
   function riderDrawer(r) {
+    overlayOps(r);
     drawer(r.name + ' \u00B7 ' + r.id, function (b, close) {
-      b.appendChild(h('div', { class: 'dcard' }, [kv('Phone', r.reveal ? '+91 ' + r.phone : mask(r.phone)), kv('City', r.city), kv('Member since', String(r.since)), kv('Rides', String(r.rides)), kv('Rating', '\u2605 ' + r.rating), kv('Wallet', money(r.wallet)), kv('Status', r.status)]));
-      b.appendChild(btn(r.reveal ? 'Hide full number' : 'Reveal full number (logged)', 'g', function () { if (r.reveal) { r.reveal = false; save(); close(); draw('A05'); return; } act('user.pii.view_full', 'view a full phone number', 'pii.viewed', r.id).then(function (ok) { if (ok) { r.reveal = true; save(); close(); draw('A05'); riderDrawer(r); } }); }));
+      b.appendChild(h('div', { class: 'dcard' }, [kv('Phone', r.reveal ? '+91 ' + r.phone : mask(r.phone)), kv('City', r.city), kv('Member since', String(r.since)), kv('Rides', String(r.rides)), kv('Rating', r.rating === '—' ? '—' : '\u2605 ' + r.rating), kv('Wallet', money(r.wallet)), kv('Status', r.status), r.live ? kv('Source', 'Live ops (Platform control)') : null]));
+      b.appendChild(btn(r.reveal ? 'Hide full number' : 'Reveal full number (logged)', 'g', function () { if (r.reveal) { r.reveal = false; if (!r.live) save(); close(); draw('A05'); return; } act('user.pii.view_full', 'view a full phone number', 'pii.viewed', r.id).then(function (ok) { if (ok) { r.reveal = true; if (!r.live) save(); close(); draw('A05'); riderDrawer(r); } }); }));
       b.appendChild(L.field({ name: 'credit', label: 'Goodwill credit (\u20B9)', type: 'tel', inputmode: 'numeric', maxlength: 4 }));
-      b.appendChild(btn('Credit wallet', '', function () { UI.clearErrors(); var a = parseInt(UI.val('credit'), 10); if (!(a >= 10 && a <= 2000)) { UI.fieldError('credit', 'Enter \u20B910 to \u20B92,000.'); return; } act('payment.refund', 'credit a customer', 'refund.issued', r.id).then(function (ok) { if (!ok) return; r.wallet += a * 100; save(); close(); draw('A05'); UI.toast(money(a * 100) + ' credited to ' + r.name + '.', 'info'); }); }));
-      b.appendChild(btn(r.status === 'Blocked' ? 'Unblock account' : 'Block account', r.status === 'Blocked' ? 'g' : 'bad', function () { var to = r.status === 'Blocked' ? 'Active' : 'Blocked'; UI.confirm((to === 'Blocked' ? 'Block ' : 'Unblock ') + r.name + '? This is recorded in the audit log.', to === 'Blocked' ? 'Block' : 'Unblock').then(function (y) { if (!y) return; act('fraud.block_account', to === 'Blocked' ? 'block an account' : 'unblock an account', to === 'Blocked' ? 'account.blocked' : 'account.unblocked', r.id).then(function (ok) { if (!ok) return; var prev = r.status; r.status = to; save(); close(); draw('A05'); UI.toast(r.name + ' ' + to.toLowerCase() + '.', 'info'); }); }); }));
+      b.appendChild(btn('Credit wallet', '', function () {
+        UI.clearErrors(); var a = parseInt(UI.val('credit'), 10); if (!(a >= 10 && a <= 2000)) { UI.fieldError('credit', 'Enter \u20B910 to \u20B92,000.'); return; }
+        if (r._mutBusy) return; r._mutBusy = true;
+        act('payment.refund', 'credit a customer', 'refund.issued', r.id).then(function (ok) {
+          r._mutBusy = false; if (!ok) return;
+          var paise = a * 100; r.wallet += paise; if (!r.live) save();
+          pushWallet(r.phone, r.name, paise, 'Goodwill credit from Admin riders (A05)', 'Adjustment', '', 'admin-A05');
+          close(); draw('A05'); UI.toast(money(paise) + ' credited to ' + r.name + ' (ops ledger updated).', 'info');
+        }, function () { r._mutBusy = false; });
+      }));
+      b.appendChild(btn(r.status === 'Blocked' ? 'Unblock account' : 'Block account', r.status === 'Blocked' ? 'g' : 'bad', function () {
+        var to = r.status === 'Blocked' ? 'Active' : 'Blocked';
+        UI.confirm((to === 'Blocked' ? 'Block ' : 'Unblock ') + r.name + '? This updates the shared ops record and audit log.', to === 'Blocked' ? 'Block' : 'Unblock').then(function (y) {
+          if (!y) return; if (r._mutBusy) return; r._mutBusy = true;
+          act('fraud.block_account', to === 'Blocked' ? 'block an account' : 'unblock an account', to === 'Blocked' ? 'account.blocked' : 'account.unblocked', r.id).then(function (ok) {
+            r._mutBusy = false; if (!ok) return;
+            r.status = to; if (!r.live) save();
+            pushBlock(r.phone, r.name, to === 'Blocked', to === 'Blocked' ? 'Blocked from Admin riders (A05)' : '');
+            close(); draw('A05'); UI.toast(r.name + ' ' + to.toLowerCase() + ' (ops synced).', 'info');
+          }, function () { r._mutBusy = false; });
+        });
+      }));
     });
   }
 
@@ -205,7 +271,13 @@
       b.appendChild(L.field({ name: 'rwhy', label: 'Reason', select: ['Driver took longer route', 'Charged after cancelling', 'Service not delivered', 'Duplicate charge', 'Goodwill'] }));
       b.appendChild(h('div', { class: 'a-note' }, 'Refunds above \u20B9500 need a finance manager (switch role on A20 to try).'));
       b.appendChild(btn('Issue refund', '', function () { UI.clearErrors(); var a = Math.round(parseFloat(UI.val('ramt')) * 100); if (!(a > 0 && a <= left)) { UI.fieldError('ramt', 'Enter up to ' + money(left) + '.'); return; } if (a > 50000 && ['FINANCE_MANAGER', 'SUPER_ADMIN'].indexOf(role()) < 0) { UI.fieldError('ramt', 'Above \u20B9500 needs a finance manager.'); return; }
-        act('payment.refund', 'issue a refund', 'refund.issued', t.id).then(function (ok) { if (!ok) return; t.refunded += a; if (t.refunded >= t.paise) t.status = 'Refunded'; save(); close(); draw('A11'); UI.toast(money(a) + ' refunded to ' + t.method + '. Rider notified.', 'info'); }); }));
+        if (t._mutBusy) return; t._mutBusy = true;
+        act('payment.refund', 'issue a refund', 'refund.issued', t.id).then(function (ok) {
+          t._mutBusy = false; if (!ok) return;
+          t.refunded += a; if (t.refunded >= t.paise) t.status = 'Refunded'; save();
+          var ph = phoneForRiderName(t.rider); if (ph) pushWallet(ph, t.rider, a, 'Refund for ' + t.ride + ' (' + UI.val('rwhy') + ')', 'Refund', t.ride, 'admin-A11');
+          close(); draw('A11'); UI.toast(money(a) + ' refunded to ' + t.method + (ph ? ' · ops ledger updated' : '') + '. Rider notified (simulated).', 'info');
+        }, function () { t._mutBusy = false; }); }));
     });
   }
   L.every(function () { if (Math.random() > 0.15) return; var r = Math.random(), m = ['UPI', 'Card', 'UPI', 'Wallet'][Math.floor(r * 4)]; S.tx.unshift({ id: 'pay_' + Math.floor(Date.now() / 1000 % 1e6).toString(16), ride: 'RN-' + String(126 + Math.floor(Math.random() * 900)).padStart(5, '0'), method: m, paise: Math.round(80 + Math.random() * 600) * 100, refunded: 0, status: Math.random() < 0.06 ? 'Failed' : 'Captured', at: Date.now(), ref: 'pay_' + Math.floor(Math.random() * 1e6).toString(36), rider: NAMES[Math.floor(Math.random() * NAMES.length)] }); if (S.tx.length > 120) S.tx.length = 120; save(); if (UI.sid === 'A11' && !UI.q('#mock .a-scrim') && !(document.activeElement && document.activeElement.classList.contains('a-search'))) draw('A11'); });

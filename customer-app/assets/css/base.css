@@ -212,7 +212,10 @@
 .svc a i{width:56px;height:52px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--brand);position:relative}
 .svc a i svg{width:24px;height:24px}
 .svc a i em{position:absolute;top:-6px;right:-8px;font-style:normal;font-size:9px;font-weight:800;background:var(--amber);color:#111B24;border-radius:6px;padding:1px 4px}
-.modes{display:flex;gap:6px;overflow:hidden}
+.modes{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;padding:2px 2px 6px;margin:0 -2px;scrollbar-width:thin;touch-action:pan-x}
+.modes::-webkit-scrollbar{height:4px}
+.modes::-webkit-scrollbar-thumb{background:#C5D0D6;border-radius:4px}
+.modes>.mode{flex:0 0 auto;scroll-snap-align:start;white-space:nowrap}
 .mode{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:7px 10px;border-radius:12px;border:1.5px solid var(--line);font-size:12px;font-weight:700;background:#fff}
 .mode.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
 .mode.urgent.on{border-color:var(--red);background:var(--red-soft);color:var(--red)}

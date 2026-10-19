@@ -51,6 +51,12 @@
 .p-code{align-items:flex-end}
 .p-code .btn{height:46px;flex:0 0 84px}
 .p-hint{font-size:11.5px;color:var(--muted)}
+.p-terms-check{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.35;margin:10px 0 4px;cursor:pointer}
+.p-terms-check input{margin-top:2px;width:18px;height:18px;flex:0 0 auto;accent-color:var(--brand)}
+.p-loc-banner{font-size:11.5px;line-height:1.35}
+.phone select.rn-input{width:100%;border:0;background:transparent;font:inherit;outline:0;appearance:auto;-webkit-appearance:menulist}
+.p-gps{display:flex;align-items:center;gap:8px;margin-top:6px}
+.p-gps .chip{flex:0 0 auto}
 .p-link{cursor:pointer}
 .p-form[hidden],.p-sheet [hidden]{display:none!important}
 .p-link:focus-visible,.p-pick b:focus-visible{outline:3px solid #2F6FDB;outline-offset:2px}

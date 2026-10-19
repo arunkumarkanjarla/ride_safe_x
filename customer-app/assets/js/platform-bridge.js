@@ -6,7 +6,7 @@
   var RN = window.RN, PC = window.RNPC; if (!RN || !PC || !RN.product) return;
   var UI = RN.ui, P = RN.product, S = RN.store, K = RN.kit;
   var EXTRA = { 'Extra luggage': 4000, 'Pet friendly': 3000, 'Prefer woman driver': 0, 'Trip insurance': 500 };
-  function leg(trip) { var from = P.pickup(), to = trip && trip.drop || from; var km = Math.max(1.2, Math.round(P.hav(from, to) * 1.3 * 10) / 10); return { from: from, to: to, km: km, mins: Math.max(6, Math.round(km / 24 * 60 + 4)) }; }
+  function leg(trip) { var from = (trip && trip.pickup) || P.pickup(), to = trip && trip.drop || from; var km = Math.max(1.2, Math.round(P.hav(from, to) * 1.3 * 10) / 10); return { from: from, to: to, km: km, mins: Math.max(6, Math.round(km / 24 * 60 + 4)) }; }
   // ------------------------------------------------ fares: one formula shared with the admin fare calculator
   var baseQuote = P.quote;
   P.quote = function (trip, vehicle, extras, opts) {
@@ -27,7 +27,7 @@
     var V = P.VEH, live = PC.vehicles({ places: places });
     if (!live.length) live = PC.vehicles();
     Object.keys(V).forEach(function (k) { delete V[k]; });
-    live.forEach(function (v) { var r = PC.rate(v.id) || {}; V[v.id] = { icon: v.icon, base: r.base, km: r.perKm, min: r.perMin, eta: v.eta, seats: v.seats, note: v.note }; });
+    live.forEach(function (v) { var r = PC.rate(v.id) || {}; V[v.id] = { icon: v.icon, base: r.base, km: r.perKm, min: r.perMin, eta: v.eta, seats: v.seats, note: v.note, label: v.label || v.id }; });
     if (P.SVC) { P.SVC.length = 0; PC.services().forEach(function (s) { P.SVC.push([s.label, s.icon, s.go, s.arg || null, s.badge || null]); }); }
     if (P.COUPONS) { P.COUPONS.length = 0; PC.coupons().forEach(function (c) { P.COUPONS.push(c); }); }
     var root = document.documentElement; Object.keys(PC.cfg.flags || {}).forEach(function (k) { root.classList.toggle('rnpc-off-' + k, !PC.cfg.flags[k]); });
@@ -41,16 +41,36 @@
   // ------------------------------------------------ account: registry, block, wallet credits, booking commands
   function me() { var u = S.user && S.user(); return u && u.phone ? u : null; }
   var pubSig = '', lastSeen = 0;
+  function rideOpsRow(u, ride) {
+    var d = ride.driverId && RN.data && RN.data.DRIVERS ? RN.data.DRIVERS[ride.driverId] : null;
+    var label = K && K.label ? K.label(ride.state) : ride.state;
+    var terminal = /CANCELLED|CLOSED|PAYMENT_COMPLETED/.test(ride.state);
+    return {
+      id: ride.id, phone: u.phone, type: 'ride',
+      title: (ride.vehicle || 'Ride') + (ride.drop || ride.dropName ? ' to ' + (ride.dropName || ride.drop) : ''),
+      sub: terminal ? (ride.state === 'CANCELLED' ? 'Cancelled' : 'Completed') : 'Live · ' + label,
+      status: label, state: ride.state,
+      paise: ride.finalPaise || ride.farePaise || ride.quotePaise || ride.totalPaise || 0,
+      at: ride.endedAt || ride.requestedAt || ride.createdAt || Date.now(),
+      driver: d ? (d.name + ' · ' + d.vehicle + ' · ' + d.plate) : (ride.driverName || ride.driverId || ''),
+      driverId: ride.driverId || '', rev: (UI.engine.state && UI.engine.state.rev) || 0
+    };
+  }
   function publish(u) {
     var bk = (u.bookings || []).slice(0, 40).map(function (b) { return { id: b.id, phone: u.phone, type: b.type, title: b.title || b.type, sub: b.sub || '', status: b.status || 'Confirmed', paise: b.paise || 0, at: b.createdAt || b.at || 0, driver: b.driver || '' }; });
-    var ride = UI.engine && UI.engine.activeRide && UI.engine.activeRide();
-    if (ride) bk.unshift({ id: ride.id, phone: u.phone, type: 'ride', title: (ride.vehicle || 'Ride') + (ride.dropName ? ' to ' + ride.dropName : ''), sub: 'Live ride', status: K && K.label ? K.label(ride.state) : ride.state, paise: ride.farePaise || ride.quotePaise || ride.totalPaise || 0, at: ride.createdAt || Date.now(), driver: ride.driverName || '' });
-    var inc = [], s = UI.engine && UI.engine.state; if (s && s.incidents) Object.keys(s.incidents).forEach(function (k) { var i = s.incidents[k]; inc.push({ id: i.id || k, from: 'Rider +91 ' + u.phone, text: (i.kind || 'SOS') + (i.rideId ? ' on ' + i.rideId : ''), state: i.state, at: i.at || i.createdAt || 0 }); });
-    var sig = JSON.stringify([u.name, u.walletPaise, bk, inc]), now = Date.now();
+    var s = UI.engine && UI.engine.state;
+    if (s && s.rideOrder) {
+      s.rideOrder.slice(-12).forEach(function (id) {
+        var ride = s.rides[id]; if (!ride) return;
+        bk.unshift(rideOpsRow(u, ride));
+      });
+    }
+    var inc = []; if (s && s.incidents) Object.keys(s.incidents).forEach(function (k) { var i = s.incidents[k]; inc.push({ id: i.id || k, from: 'Rider +91 ' + u.phone, text: (i.kind || 'SOS') + (i.rideId ? ' on ' + i.rideId : ''), state: i.state, at: i.at || i.createdAt || 0 }); });
+    var sig = JSON.stringify([u.name, u.walletPaise, bk, inc, s && s.rev]), now = Date.now();
     if (sig === pubSig && now - lastSeen < 60000) return; pubSig = sig; lastSeen = now;
     PC.opsUpdate(function (o) {
       var c = o.customers[u.phone] = o.customers[u.phone] || {}; c.name = u.name || c.name || ''; c.walletPaise = u.walletPaise; c.bookings = (u.bookings || []).length; c.seen = now;
-      bk.forEach(function (b) { var old = o.bookings[b.id]; if (old && /RideNova/.test(old.status) && !/RideNova/.test(b.status)) return; o.bookings[b.id] = Object.assign({}, old || {}, b); });
+      bk.forEach(function (b) { var old = o.bookings[b.id]; if (old && /RideNova/.test(old.status || '') && !/RideNova/.test(b.status || '')) return; o.bookings[b.id] = Object.assign({}, old || {}, b); });
       inc.forEach(function (i) { var old = o.sos[i.id]; if (!old) o.sos[i.id] = { id: i.id, from: i.from, text: i.text, status: 'Open', at: i.at || now }; else if (/RESOLVED|CLOSED|FALSE/.test(i.state) && old.status !== 'Resolved') old.status = 'Resolved'; });
     });
   }

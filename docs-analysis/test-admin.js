@@ -39,7 +39,22 @@ const typeSearch = (v) => ev(`(()=>{const i=document.querySelector('#mock .a-sea
     await ev(`document.querySelector('#mock .dc tbody tr').click()`); await sleep(200); await setv('credit', '5'); await clickText('.a-drawer button', 'Credit wallet'); await sleep(200); check('credit validation', (await err('credit')).length > 0);
     await setv('credit', '150'); await clickText('.a-drawer button', 'Credit wallet'); await sleep(900); check('credit denied for ops manager (RBAC)', await ev(`!!document.querySelector('.a-drawer')`));
     await ev(`RN.ui.exec('admin.setRole',{role:'FINANCE_MANAGER'},{instant:true})`); await sleep(200); await clickText('.a-drawer button', 'Credit wallet'); await sleep(900); check('credit applied as finance manager', !(await ev(`!!document.querySelector('.a-drawer')`)) && /\u20B9/.test(await dcText()));
+    // P0 ops bridge: A05 credit must land on canonical ridenova.ops.v1 ledger
+    const opsAfterCredit = await ev(`(()=>{try{const o=JSON.parse(localStorage.getItem('ridenova.ops.v1')||'{}');const w=(o.wallet||[]).filter(x=>x.source==='admin-A05'&&x.paise===15000);const ph=w[0]&&w[0].phone;const c=ph&&o.customers&&o.customers[ph];return {n:w.length,phone:ph||'',walletOk:!!(c&&c.walletPaise>=15000),audit:(o.audit||[]).some(a=>a.action==='wallet.adjust')}}catch(e){return {err:String(e)}}})()`);
+    check('A05 credit written to ops wallet ledger', opsAfterCredit.n >= 1 && !!opsAfterCredit.phone, JSON.stringify(opsAfterCredit));
+    check('A05 credit mirrored on ops.customers walletPaise', !!opsAfterCredit.walletOk, JSON.stringify(opsAfterCredit));
+    await ev(`RN.ui.exec('admin.setRole',{role:'SUPER_ADMIN'},{instant:true})`); await sleep(200);
+    await typeSearch('Ananya'); await sleep(200);
+    await ev(`document.querySelector('#mock .dc tbody tr').click()`); await sleep(300);
+    await clickText('.a-drawer button', 'Block account');
+    await until(`!!document.querySelector('dialog.rn-dialog')`, 4000, 'block confirm');
+    await ev(`document.querySelector('dialog.rn-dialog button.primary').click()`);
+    await until(`!document.querySelector('dialog.rn-dialog')`, 4000, 'confirm closed');
+    await sleep(600);
+    const opsBlock = await ev(`(()=>{try{const o=JSON.parse(localStorage.getItem('ridenova.ops.v1')||'{}');const ph=Object.keys(o.customers||{}).find(k=>o.customers[k].blocked);const a05=(o.audit||[]).filter(a=>a.action==='customer.block');return {blocked:!!ph,phone:ph||'',action:a05.length>0,auditN:a05.length,status:document.querySelector('#mock .dc')&&document.querySelector('#mock .dc').textContent.includes('Blocked')}}catch(e){return {err:String(e)}}})()`);
+    check('A05 block synced to ops.customers', opsBlock.blocked && opsBlock.action, JSON.stringify(opsBlock));
     await ev(`RN.ui.exec('admin.setRole',{role:'OPS_MANAGER'},{instant:true})`); await sleep(200);
+    await typeSearch('Ananya'); await sleep(200);
     await ev(`document.querySelector('#mock .dc tbody tr').click()`); await sleep(200); await clickText('.a-drawer button', 'Reveal'); await sleep(900); check('PII reveal denied for ops manager', /\+91 \d{10}/.test(await dcText()) === false);
     await ev(`document.querySelector('.a-x')?.click()`);
   });

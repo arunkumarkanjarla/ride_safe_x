@@ -38,38 +38,108 @@
       if (UI.sid !== 'R01') return;
       restore(ctx).then(function (ok) {
         if (UI.sid !== 'R01') return;
-        UI.go(ok ? 'R29' : S.db.onboarded ? 'R58' : 'R02', { replace: true });
+        if (!ok) { UI.go(S.db.onboarded ? 'R58' : 'R02', { replace: true }); return; }
+        // resume live trip after reload; never reopen a completed/cancelled booking as active
+        var live = UI.engine && UI.engine.activeRide && UI.engine.activeRide();
+        var next = live && RN.engineLib && RN.engineLib.rideScreen ? RN.engineLib.rideScreen(live) : 'R29';
+        UI.go(next || 'R29', { replace: true });
       });
     }, 1300);
   } });
   K.extend('R02', { init: function () { S.db.onboarded = true; S.save(); leaveIfSignedIn(); } });
 
   // ------------------------------------------------------------ R03 phone
+  var COUNTRIES = [
+    { id: 'IN', dial: '+91', flag: '\uD83C\uDDEE\uD83C\uDDF3', name: 'India', lat: [6, 37], lon: [68, 98] },
+    { id: 'AE', dial: '+971', flag: '\uD83C\uDDE6\uD83C\uDDEA', name: 'United Arab Emirates', lat: [22, 27], lon: [51, 57] },
+    { id: 'US', dial: '+1', flag: '\uD83C\uDDFA\uD83C\uDDF8', name: 'United States', lat: [24, 50], lon: [-125, -66] },
+    { id: 'GB', dial: '+44', flag: '\uD83C\uDDEC\uD83C\uDDE7', name: 'United Kingdom', lat: [49, 61], lon: [-9, 2] },
+    { id: 'SG', dial: '+65', flag: '\uD83C\uDDF8\uD83C\uDDEC', name: 'Singapore', lat: [1.1, 1.5], lon: [103.6, 104.1] },
+    { id: 'AU', dial: '+61', flag: '\uD83C\uDDE6\uD83C\uDDFA', name: 'Australia', lat: [-44, -10], lon: [112, 154] }
+  ];
+  function countryFromCoords(lat, lon) {
+    for (var i = 0; i < COUNTRIES.length; i++) {
+      var c = COUNTRIES[i];
+      if (lat >= c.lat[0] && lat <= c.lat[1] && lon >= c.lon[0] && lon <= c.lon[1]) return c.id;
+    }
+    return 'IN';
+  }
+  function fillCountrySelect(sel, prefer) {
+    if (!sel) return;
+    P.clear(sel);
+    COUNTRIES.forEach(function (c) {
+      var o = document.createElement('option');
+      o.value = c.id; o.textContent = c.flag + ' ' + c.dial + ' · ' + c.name;
+      if (c.id === prefer) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+  function guessCountryId() {
+    try {
+      var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      if (/Kolkata|Calcutta|India/.test(tz)) return 'IN';
+      if (/Dubai|Muscat/.test(tz)) return 'AE';
+      if (/London/.test(tz)) return 'GB';
+      if (/Singapore/.test(tz)) return 'SG';
+      if (/Sydney|Melbourne|Australia/.test(tz)) return 'AU';
+      if (/New_York|Los_Angeles|Chicago|America\//.test(tz)) return 'US';
+    } catch (e) { /* ignore */ }
+    return (P.nav.countryId || S.db.countryId || 'IN');
+  }
   K.def('R03', {
     init: function () {
       if (leaveIfSignedIn()) return;
       var f = UI.field('phone'); if (!f) return;
       f.value = UI.mem.demoPhone || P.nav.phoneDraft || ''; UI.mem.demoPhone = null; UI.clearErrors();
+      var terms = UI.q('#in-R03-terms'); if (terms) terms.checked = !!P.nav.termsOk;
+      var sel = UI.q('#in-R03-country');
+      fillCountrySelect(sel, P.nav.countryId || guessCountryId());
       var body = UI.q('#mock .body');
-      if (!UI.q('.p-hint', body)) body.insertBefore(h('div', { class: 'xs p-hint' }, 'Demo: use any valid 10-digit mobile starting 6-9. New number = new account; ' + S.pretty('9848004321') + ' is the demo customer. Code: ' + D.DEMO_CODES.riderOtp), UI.q('button[data-do="x.sendOtp"]', body));
+      if (!UI.q('.p-hint', body)) {
+        var hintHost = UI.q('button[data-do="x.sendOtp"]', body);
+        if (hintHost) body.insertBefore(h('div', { class: 'xs p-hint' }, 'Demo OTP (simulated SMS): ' + D.DEMO_CODES.riderOtp + '. Use any valid 10-digit mobile starting 6–9 for India.'), hintHost);
+      }
       var t = UI.q('#mock .h1'); if (t) t.textContent = UI.mem.authMode === 'register' ? 'Create your account' : 'Enter your phone number';
       setTimeout(function () { f.focus(); }, 60);
     },
-    actions: { sendOtp: function (n) {
-      UI.clearErrors();
-      var v = UI.field('phone').value, d = S.digits(v);
-      if (!d) { UI.fieldError('phone', 'Enter your 10-digit mobile number.'); return { ok: false }; }
-      if (!S.validPhone(d)) { UI.fieldError('phone', d.length !== 10 ? 'A mobile number has 10 digits (you entered ' + d.length + ').' : 'Indian mobile numbers start with 6, 7, 8 or 9.'); return { ok: false }; }
-      P.nav.phoneDraft = v;
-      return exec('auth.sendOtp', { phone: d }, n).then(function (r) {
-        if (!r.ok) return r;
-        P.nav.phone = d;
-        var known = S.isRegistered(d);
-        if (UI.mem.authMode === 'login' && !known) UI.toast('No account for this number yet: we will set one up after you verify.', 'info');
-        if (UI.mem.authMode === 'register' && known) UI.toast('This number already has an account: signing you in.', 'info');
-        UI.go('R04'); return r;
-      });
-    } }
+    actions: {
+      requestLocation: function () {
+        if (!navigator.geolocation) { UI.toast('Location is not available in this browser. Choose a country manually.', 'warn'); return { ok: false }; }
+        UI.toast('Requesting location permission…', 'info');
+        navigator.geolocation.getCurrentPosition(function (pos) {
+          var id = countryFromCoords(pos.coords.latitude, pos.coords.longitude);
+          P.nav.countryId = id; try { if (S.db) { S.db.countryId = id; if (S.save) S.save(); } } catch (e) { /* ignore */ }
+          fillCountrySelect(UI.q('#in-R03-country'), id);
+          var c = COUNTRIES.filter(function (x) { return x.id === id; })[0];
+          UI.toast('Country set to ' + (c ? c.name : id) + ' from browser location (static demo · not a Google Maps API).', 'ok');
+          if (P.requestGeo) P.requestGeo(function () { /* warm pickup cache */ });
+        }, function () {
+          UI.toast('Location denied or unavailable. Select your country from the list.', 'warn');
+        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+        return { ok: true };
+      },
+      sendOtp: function (n) {
+        UI.clearErrors();
+        var terms = UI.q('#in-R03-terms');
+        if (!terms || !terms.checked) { UI.fieldError('terms', 'Please accept the Terms and Privacy Policy to continue.'); UI.toast('Tick the Terms checkbox to continue.', 'error'); return { ok: false }; }
+        P.nav.termsOk = true;
+        var sel = UI.q('#in-R03-country');
+        P.nav.countryId = (sel && sel.value) || guessCountryId();
+        var v = UI.field('phone').value, d = S.digits(v);
+        if (!d) { UI.fieldError('phone', 'Enter your 10-digit mobile number.'); return { ok: false }; }
+        if (P.nav.countryId === 'IN' && !S.validPhone(d)) { UI.fieldError('phone', d.length !== 10 ? 'A mobile number has 10 digits (you entered ' + d.length + ').' : 'Indian mobile numbers start with 6, 7, 8 or 9.'); return { ok: false }; }
+        if (P.nav.countryId !== 'IN' && d.length < 7) { UI.fieldError('phone', 'Enter a valid mobile number for the selected country.'); return { ok: false }; }
+        P.nav.phoneDraft = v;
+        return exec('auth.sendOtp', { phone: d }, n).then(function (r) {
+          if (!r.ok) return r;
+          P.nav.phone = d;
+          var known = S.isRegistered(d);
+          if (UI.mem.authMode === 'login' && !known) UI.toast('No account for this number yet: we will set one up after you verify.', 'info');
+          if (UI.mem.authMode === 'register' && known) UI.toast('This number already has an account: signing you in.', 'info');
+          UI.go('R04'); return r;
+        });
+      }
+    }
   });
 
   // ------------------------------------------------------------ R04 OTP

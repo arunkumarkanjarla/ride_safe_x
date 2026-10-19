@@ -18,22 +18,52 @@
   ].map(function (p) { return { n: p[0], a: p[1], lat: p[2], lon: p[3] }; });
   P.PLACES = PLACES;
   var HOME_PICKUP = { n: 'Gate 2, Lumbini Apartments', a: 'Road 12, Banjara Hills', lat: 17.4126, lon: 78.4482 };
+  P.livePickup = null;
   function hav(a, b) { var R = 6371, rad = Math.PI / 180, dLa = (b.lat - a.lat) * rad, dLo = (b.lon - a.lon) * rad, x = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLo / 2) * Math.sin(dLo / 2); return 2 * R * Math.asin(Math.sqrt(x)); }
   P.hav = hav;
+  function nearestPlace(lat, lon) {
+    var best = HOME_PICKUP, bestD = hav({ lat: lat, lon: lon }, HOME_PICKUP);
+    PLACES.forEach(function (p) { var d = hav({ lat: lat, lon: lon }, p); if (d < bestD) { bestD = d; best = p; } });
+    return { place: best, km: bestD };
+  }
   function textPlace(text) {
     var t = String(text).trim(), m = PLACES.filter(function (p) { return p.n.toLowerCase() === t.toLowerCase(); })[0]; if (m) return m;
     var r = P.seeded(t.toLowerCase()); return { n: t, a: 'Hyderabad', lat: 17.35 + r() * 0.15, lon: 78.34 + r() * 0.2, custom: true };
   }
-  P.pickup = function () { var u = S.user(); return u && u.saved.home ? Object.assign({}, HOME_PICKUP, { a: u.saved.home.area }) : Object.assign({}, HOME_PICKUP); };
+  P.pickup = function () {
+    if (P.livePickup) return Object.assign({}, P.livePickup);
+    var u = S.user(); return u && u.saved && u.saved.home ? Object.assign({}, HOME_PICKUP, { a: u.saved.home.area }) : Object.assign({}, HOME_PICKUP);
+  };
+  P.requestGeo = function (cb) {
+    cb = cb || function () {};
+    if (!navigator.geolocation) { cb(null, 'Geolocation is not available in this browser.'); return; }
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var lat = pos.coords.latitude, lon = pos.coords.longitude, acc = Math.round(pos.coords.accuracy || 0);
+      var near = nearestPlace(lat, lon), p = near.place;
+      P.livePickup = {
+        n: near.km < 0.35 ? p.n : 'Near ' + p.n,
+        a: (near.km < 0.35 ? p.a : p.a + ' \u00B7 ~' + near.km.toFixed(1) + ' km') + (acc ? ' \u00B7 \u00B1' + acc + ' m' : ''),
+        lat: lat, lon: lon, gps: true, matched: p.n
+      };
+      if (P.trip) P.trip.pickup = Object.assign({}, P.livePickup);
+      cb(P.livePickup, null);
+    }, function (err) {
+      cb(null, (err && err.message) || 'Location permission denied.');
+    }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 15000 });
+  };
   P.trip = { pickup: null, drop: null, vehicle: 'Cab', pay: 'UPI', extras: [], label: '' };
-  function legOf(drop) { var from = P.pickup(), km = Math.max(1.2, Math.round(hav(from, drop) * 1.3 * 10) / 10); return { km: km, mins: Math.max(6, Math.round(km / 24 * 60 + 4)) }; }
+  function legOf(drop) { var from = (P.trip && P.trip.pickup) || P.pickup(), km = Math.max(1.2, Math.round(hav(from, drop) * 1.3 * 10) / 10); return { km: km, mins: Math.max(6, Math.round(km / 24 * 60 + 4)) }; }
   var VEH = {
-    Bike: { icon: 'bike', base: 20, km: 6.5, min: 0.8, eta: 2, seats: 1, note: 'Helmet provided \u00B7 1 seat' },
-    Auto: { icon: 'auto', base: 30, km: 11, min: 1, eta: 4, seats: 3, note: 'Metered fare \u00B7 3 seats' },
-    Cab: { icon: 'car', base: 50, km: 14.5, min: 1.5, eta: 3, seats: 4, note: 'AC \u00B7 4 seats' },
-    Premium: { icon: 'car2', base: 80, km: 21, min: 2.2, eta: 6, seats: 4, note: 'Top-rated drivers \u00B7 sedan' }
+    Bike: { label: 'Bike', icon: 'bike', base: 20, km: 6.5, min: 0.8, eta: 2, seats: 1, note: 'Helmet provided \u00B7 1 seat' },
+    Auto: { label: 'Auto', icon: 'auto', base: 30, km: 11, min: 1, eta: 4, seats: 3, note: 'Metered fare \u00B7 3 seats' },
+    Cab: { label: 'Hatch AC', icon: 'car', base: 50, km: 14.5, min: 1.5, eta: 3, seats: 4, note: 'AC \u00B7 4 seats' },
+    CabNonAC: { label: 'Hatch Non-AC', icon: 'car', base: 42, km: 12, min: 1.2, eta: 4, seats: 4, note: 'Non-AC \u00B7 4 seats' },
+    CabSUV: { label: 'SUV AC', icon: 'car2', base: 85, km: 19, min: 2, eta: 5, seats: 7, note: 'AC \u00B7 7 seats' },
+    CabMUV: { label: 'MUV Non-AC', icon: 'car2', base: 72, km: 16.5, min: 1.7, eta: 6, seats: 7, note: 'Non-AC \u00B7 7 seats' },
+    Premium: { label: 'Premium', icon: 'car2', base: 80, km: 21, min: 2.2, eta: 6, seats: 4, note: 'Top-rated drivers \u00B7 sedan AC' }
   };
   P.VEH = VEH;
+  function vehLabel(id) { return (VEH[id] && VEH[id].label) || id; }
   function surgeNow() { var hr = new Date().getHours(); return (hr >= 8 && hr < 10) || (hr >= 17 && hr < 20) ? 1.2 : 1; }
   // quote for a vehicle on the current trip; amounts in paise, lines add up to the total exactly
   P.quote = function (trip, vehicle, extras, opts) {
@@ -145,8 +175,23 @@
   P.screen('R08', {
     title: 'Plan your ride', back: 'R07',
     build: function (body, v) {
-      var from = P.pickup();
-      body.appendChild(h('div', { class: 'card-m x-gap-0' }, [h('div', { class: 'loc' }, [h('span', { class: 'd' }), h('span', { class: 'tx' }, [h('b', null, 'Current location'), h('span', null, from.a)])])]));
+      var locCard = h('div', { class: 'card-m x-gap-0' });
+      function paintLoc() {
+        var from = P.pickup();
+        P.clear(locCard);
+        locCard.appendChild(h('div', { class: 'loc' }, [h('span', { class: 'd' }), h('span', { class: 'tx' }, [h('b', null, 'Current location'), h('span', null, from.a || from.n)])]));
+        locCard.appendChild(h('div', { class: 'p-gps' }, [
+          h('button', { type: 'button', class: 'chip', on: { click: function () {
+            UI.toast('Getting precise location (browser GPS · matched to nearby places; not a Google Maps API).', 'info');
+            P.requestGeo(function (p, err) {
+              if (err) { UI.toast(err + ' Showing your saved / demo pickup.', 'warn'); paintLoc(); return; }
+              UI.toast('Pickup set near ' + p.matched + ' from your GPS.', 'ok'); paintLoc();
+            });
+          } } }, 'Use precise location')
+        ]));
+      }
+      paintLoc(); body.appendChild(locCard);
+      if (!P.livePickup) P.requestGeo(function () { paintLoc(); });
       var pk = P.placePicker({ placeholder: 'Where to? Search a place or address', onPick: function (p) { setDrop(p); P.trip.extras = []; UI.toast('Destination: ' + p.n + '. Fares are estimates.', 'info'); UI.go(UI.engine.state.rider.priority === 'bal' ? 'R09' : 'R31'); } });
       body.appendChild(pk); setTimeout(function () { pk.input.focus(); }, 80);
     }
@@ -197,7 +242,7 @@
       var book = P.btn('', '', function () {
         if (active) { UI.toast('You already have an active ride.', 'error'); UI.go(RN.engineLib.rideScreen(active)); return; }
         if (UI.engine.state.rider.debtPaise > 0) { UI.toast('Settle your unpaid fare first.', 'error'); UI.go('R17'); return; }
-        t.vehicle = v.veh; t.label = v.veh; t.pay = v.pay; t.extras = []; t.factor = 1; UI.go('R10');
+        t.vehicle = v.veh; t.label = vehLabel(v.veh); t.pay = v.pay; t.extras = []; t.factor = 1; UI.go('R10');
       });
       var payRow = h('div', { class: 'inp' }, [h('label', null, 'Pay with'), P.chips(['Wallet', 'UPI', 'Card', 'Cash'], v.pay, function (m) { v.pay = m; })]);
       var coup = h('a', { class: 'chip', href: '#/R22', 'data-go': 'R22' }, [ic('percent', 14), ' ' + (S.user().coupon || 'Apply coupon')]);
@@ -205,9 +250,9 @@
       function draw() {
         P.clear(list);
         Object.keys(VEH).forEach(function (name) {
-          var q = P.quote(t, name), on = name === v.veh;
-          list.appendChild(P.opt({ icon: VEH[name].icon, title: name, sub: q.eta + ' min away \u00B7 ' + VEH[name].note, sub2: q.discount ? 'Coupon ' + q.code + ' saves ' + rs(q.discount) : '', price: rs(q.total), on: on, onClick: function () { v.veh = name; draw(); } }));
-          if (on) book.textContent = 'Book ' + name + ' \u00B7 ' + rs(q.total);
+          var q = P.quote(t, name), on = name === v.veh, title = vehLabel(name);
+          list.appendChild(P.opt({ icon: VEH[name].icon, title: title, sub: q.eta + ' min away \u00B7 ' + VEH[name].note, sub2: q.discount ? 'Coupon ' + q.code + ' saves ' + rs(q.discount) : '', price: rs(q.total), on: on, onClick: function () { v.veh = name; draw(); } }));
+          if (on) book.textContent = 'Book ' + title + ' \u00B7 ' + rs(q.total);
         });
       }
       draw();
@@ -225,7 +270,7 @@
     build: function (body, v) {
       var t = P.trip, u = S.user(), q = P.quote(t, t.vehicle, t.extras, { factor: t.factor || 1 });
       body.appendChild(h('div', { class: 'card-m' }, [h('div', { class: 'loc' }, [h('span', { class: 'd' }), h('span', { class: 'tx' }, [h('b', null, P.pickup().n), h('span', null, P.pickup().a + ' \u00B7 meet at the gate')])]), h('div', { class: 'vline' }), h('div', { class: 'loc' }, [h('span', { class: 'd sq' }), h('span', { class: 'tx' }, [h('b', null, t.drop.n), h('span', null, q.km + ' km \u00B7 about ' + q.mins + ' min')])])]));
-      body.appendChild(h('div', { class: 'card-m' }, [h('div', { class: 'kv' }, [h('b', null, (t.label || t.vehicle) + ' fare'), h('b', { class: 'x-font-size-18px' }, rs(q.total))]), q.discount ? h('div', { class: 'xs' }, 'Includes coupon ' + q.code + ' (-' + rs(q.discount) + ')') : null, q.surge > 1 ? h('div', { class: 'xs' }, 'High demand ' + q.surge + 'x applied') : null]));
+      body.appendChild(h('div', { class: 'card-m' }, [h('div', { class: 'kv' }, [h('b', null, (t.label || vehLabel(t.vehicle)) + ' fare'), h('b', { class: 'x-font-size-18px' }, rs(q.total))]), q.discount ? h('div', { class: 'xs' }, 'Includes coupon ' + q.code + ' (-' + rs(q.discount) + ')') : null, q.surge > 1 ? h('div', { class: 'xs' }, 'High demand ' + q.surge + 'x applied') : null]));
       body.appendChild(P.field({ name: 'note', label: 'Note for the driver (optional)', maxlength: 80, placeholder: 'e.g. Blue gate, opposite the pharmacy' }));
       body.appendChild(P.sec('PAY WITH'));
       var list = h('div', { class: 'list' });

@@ -2,8 +2,8 @@
    (customer-app, driver-app, patner-app, admin). The agent portal (agent-portal/) has its own page script.
 
    * One HTML document per app; every screen is a <section class="rn-screen" data-sid="…">. Navigation changes the
-     hash route (#/R07), so the in-memory demo state survives navigation inside the app and resets on reload.
-   * State lives only in memory (no localStorage, sessionStorage, IndexedDB or cookies).
+     hash route (#/R07). Live trip simulation persists to localStorage key "ridenova.demo.v1" (same-origin reload recovery).
+   * Per-role stores (customer/driver/partner/admin) remain separate; demo auth is simulated only.
    * Connected demo: when an app runs inside connected-demo/index.html (same origin, e.g. a local HTTP server), it
      uses the hub's engine, so all apps on that page share one scenario. Otherwise it creates its own engine.
    * Interprets the data-* attributes written by source/proto_wiring.py. Text is set with textContent only. */
@@ -430,7 +430,11 @@
     if (!UI.app || !RN.Engine || !document.querySelector('.rn-screen')) return;   // only the single-document apps use this runtime
     if (CONFIG.brand) qa('.brandname').forEach(function (n) { n.textContent = CONFIG.brand; });
     try { if (window.parent !== window && window.parent.RN_HUB) UI.hub = window.parent.RN_HUB; } catch (err) { UI.hub = null; /* file:// or other origin: standalone */ }
-    var e = UI.engine = UI.hub ? UI.hub.engine : new RN.Engine({ storage: LIB.memoryStorage(), fresh: true });
+    var e = UI.engine = UI.hub ? UI.hub.engine : (function () {
+      var store = (LIB.browserStorage && LIB.browserStorage()) || LIB.memoryStorage();
+      var prior = null; try { prior = store.get(LIB.KEY || 'ridenova.demo.v1'); } catch (err) { prior = null; }
+      return new RN.Engine({ storage: store, fresh: !prior });
+    })();
     UI.ctx = { engine: e, ui: UI, sid: null, app: UI.app };
     if (UI.hub) { UI.hub.register(UI.app, window); document.body.classList.add('rn-in-hub'); }
 

@@ -33,7 +33,16 @@
   }
 
   K.extend('R29', { init: function () {
-    var b = body('R29'), u = S.user(); if (!b || !u || b.querySelector('.p-home-extra')) return;
+    var b = body('R29'), u = S.user(); if (!b || !u) return;
+    var pick = b.querySelector('.ab b[data-go="R08"], .ab b[role="link"]');
+    function paintPickup() {
+      if (!pick || !P.pickup) return;
+      var a = P.pickup().a || P.pickup().n || 'Current location';
+      pick.textContent = a.split(',')[0] + (a.indexOf(',') >= 0 ? ' ▾' : ' ▾');
+    }
+    paintPickup();
+    if (P.requestGeo && !P.livePickup) P.requestGeo(function () { paintPickup(); });
+    if (b.querySelector('.p-home-extra')) return;
     var box = h('div', { class: 'p-home-extra' });
     box.appendChild(h('div', { class: 'xs p-sec' }, 'OFFERS FOR YOU'));
     box.appendChild(h('div', { class: 'p-carousel', role: 'list', 'aria-label': 'Offers' }, (RN.offersCarousel ? RN.offersCarousel(OFFERS) : OFFERS).map(function (o) { return h('button', { type: 'button', role: 'listitem', class: 'p-offer ' + o[3], on: { click: function () { UI.go('R22'); } } }, [h('b', null, o[1]), h('span', null, o[2]), h('span', { class: 'p-offcode' }, 'Code ' + o[0])]); })));

@@ -3,8 +3,8 @@
    commands through the state machines in rn-machines.js, simulates the other parties (dispatcher,
    drivers, restaurant, payment gateway) with timers, and records an event history and audit log.
 
-   State is kept in memory only: the applications pass an in-memory store (memoryStorage), so the demo resets when
-   the page is reloaded. Nothing here is secure or authoritative; see docs/static-app/security-rules.md. */
+   Persistence: apps may pass browserStorage() so localStorage key "ridenova.demo.v1" survives reload (same-origin only).
+   Tests and connected-demo can still use memoryStorage(). Nothing here is secure or authoritative. */
 (function (root, factory) {
   var deps = (typeof module === 'object' && module.exports)
     ? { data: require('./rn-data.js'), machines: require('./rn-machines.js'), rbac: require('./rn-rbac.js') }
@@ -41,6 +41,13 @@
   function rupees(p) { var a = Math.abs(p); return (p < 0 ? '−' : '') + '₹' + Math.floor(a / 100).toLocaleString('en-IN') + (a % 100 ? '.' + String(a % 100).padStart(2, '0') : ''); }
 
   function memoryStorage() { var m = {}; return { get: function (k) { return m[k] || null; }, set: function (k, v) { m[k] = v; }, remove: function (k) { delete m[k]; } }; }
+  function browserStorage() {
+    return {
+      get: function (k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+      set: function (k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* quota / private mode */ } },
+      remove: function (k) { try { window.localStorage.removeItem(k); } catch (e) { /* ignore */ } }
+    };
+  }
 
   // ------------------------------------------------------------------ seed
   function seed(scenarioId, now, fresh) {
@@ -1205,5 +1212,5 @@
   }
 
   return { Engine: Engine, seed: seed, KEY: KEY, DUR: DUR, COMMANDS: COMMANDS, ACTIVE_RIDE: ACTIVE_RIDE, QUEUEABLE: QUEUEABLE,
-    rupees: rupees, rideScreen: rideScreen, driverScreen: driverScreen, memoryStorage: memoryStorage, CANCEL_FEE_PAISE: CANCEL_FEE_PAISE };
+    rupees: rupees, rideScreen: rideScreen, driverScreen: driverScreen, memoryStorage: memoryStorage, browserStorage: browserStorage, CANCEL_FEE_PAISE: CANCEL_FEE_PAISE };
 });

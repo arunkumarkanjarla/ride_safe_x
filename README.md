@@ -1,15 +1,19 @@
 # RideNova – static application prototype
 
+Workspace folder: `ride_safe_x` (RideSafe X). UI brand: **RideNova**.
+
 Ride-hailing and mobility platform prototype built with plain **HTML, CSS and JavaScript** for workflow validation before
-any backend work. Everything is simulated in the browser with synthetic data; nothing is sent anywhere and nothing is
-stored (each application keeps its demo state in memory and resets when reloaded).
+any backend work. Everything is simulated in the browser with synthetic data; nothing is sent to a server. Demo state
+persists in **localStorage** (platform config/ops and per-app stores) within the same browser origin.
+
+Baseline audit, workflows, defects, and certification: [`docs/`](docs/). Launch guide: [`docs/LAUNCH.md`](docs/LAUNCH.md).
 
 ## Start here
 
-Open [`index.html`](index.html) in Edge or Chrome, or serve the folder and open http://127.0.0.1:8766/ :
+Open [`index.html`](index.html) in Edge or Chrome, or serve the folder and open http://127.0.0.1:8080/ :
 
 ```bash
-py -m http.server 8766 --bind 127.0.0.1
+py -m http.server 8080 --bind 127.0.0.1
 ```
 
 | Application | Folder | Starts at |

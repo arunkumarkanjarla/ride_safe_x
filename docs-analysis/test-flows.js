@@ -105,8 +105,30 @@ async function section(name, fn) { const e0 = page.errors.length; try { await fn
       if ((await ev('RN.ui.sid')) === 'R10') {
         await clickText('.li, .opt', 'UPI').catch(() => {}); await clickText('button.btn', 'Confirm').catch(() => clickText('button.btn', 'Request')); 
         await until(`['R11','R12','R15','R17','R10'].includes(RN.ui.sid)`, 8000); console.log('after confirm sid=' + await ev('RN.ui.sid') + ' toasts=' + await ev(`[...document.querySelectorAll('.rn-toast')].map(t=>t.textContent).join('|')`));
+        // mid-trip: engine must persist; reload must restore same ride id + active state (not restart)
+        await until(`!!RN.ui.engine.activeRide()`, 30000, 'active ride exists');
+        const midId = await ev(`RN.ui.engine.activeRide().id`);
+        const midState = await ev(`RN.ui.engine.activeRide().state`);
+        check('demo engine persisted mid-trip', await ev(`!!localStorage.getItem('ridenova.demo.v1')`));
+        await page.goto(fileUrl(APP)); await until('window.RN && RN.ui && RN.ui.engine');
+        await until(`!!RN.ui.engine.activeRide()`, 15000, 'active ride after reload');
+        const afterId = await ev(`RN.ui.engine.activeRide().id`);
+        const afterState = await ev(`RN.ui.engine.activeRide().state`);
+        check('refresh recovers same ride id', afterId === midId, midId + ' -> ' + afterId);
+        check('refresh recovers active (non-terminal) state', !/CANCELLED|CLOSED|PAYMENT_COMPLETED/.test(afterState), midState + ' -> ' + afterState);
         await until(`RN.ui.sid==='R17'`, 120000, 'ride completes -> R17'); check('ride reaches trip complete', true);
+        const doneId = await ev(`RN.ui.engine.lastRide().id`);
+        const doneState = await ev(`RN.ui.engine.lastRide().state`);
+        check('completed state not rolled back to matching', !/REQUESTED|SEARCHING_DRIVER/.test(doneState), doneState);
         await until(`RN.store.user().bookings.some(b=>b.type==='ride')`, 40000, 'ride mirrored').catch(async e=>console.log(e.message+' state='+(await ev('RN.ui.engine.lastRide().state')))); const u = await store(); check('ride mirrored into bookings', u.bookings.some(x => x.type === 'ride' && x.status === 'Completed'), u.bookings.filter(x=>x.type==='ride').length);
+        // completed booking must not restart as REQUESTED/SEARCHING on reload
+        await page.goto(fileUrl(APP)); await until('window.RN && RN.ui && RN.ui.engine');
+        await sleep(800);
+        const afterDone = JSON.parse(await ev(`JSON.stringify({id:(RN.ui.engine.lastRide()||{}).id,state:(RN.ui.engine.lastRide()||{}).state})`));
+        check('reload keeps same completed ride id', afterDone.id === doneId, doneId + ' -> ' + afterDone.id);
+        check('reload does not restart completed ride', !/REQUESTED|SEARCHING_DRIVER/.test(afterDone.state || ''), afterDone.state);
+        await until(`!!(window.RNPC&&RNPC.ops.bookings['${doneId}'])`, 10000, 'ops booking for ride').catch(() => {});
+        check('ops booking mirrors ride id', await ev(`!!(window.RNPC&&RNPC.ops.bookings['${doneId}'])`));
       }
     });
     await section('assistant + support', async () => {

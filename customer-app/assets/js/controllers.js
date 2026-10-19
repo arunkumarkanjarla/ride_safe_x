@@ -12,16 +12,7 @@
     setTimeout(function () { if (UI.sid !== 'R01') return; var s = ctx.engine.state; UI.go(s.session.rider.status === 'signed_in' ? 'R29' : 'R02', { replace: true }); }, 1600);
   } });
 
-  def('R03', { init: function () {
-      if (UI.mem.demoPhone) { UI.field('phone').value = UI.mem.demoPhone; }
-      UI.toast((UI.mem.authMode === 'register' ? 'Create an account: ' : 'Sign in: ') + 'any valid Indian mobile works; the code comes by simulated SMS.', 'info');
-    },
-    actions: { sendOtp: function (n) {
-      UI.clearErrors();
-      var v = UI.field('phone').value, digits = v.replace(/\D/g, '');
-      if (!/^[6-9]\d{9}$/.test(digits)) { UI.fieldError('phone', 'Enter a valid 10-digit mobile number starting with 6–9.'); UI.field('phone').focus(); return { ok: false }; }
-      return exec('auth.sendOtp', { phone: v }, n).then(function (r) { if (r.ok) UI.go('R04'); return r; });
-    } } });
+  // R03 behaviour (terms checkbox, country + location) lives in product-core.js (loaded after this file).
 
   var resendAt = 0;
   def('R04', {

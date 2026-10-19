@@ -45,7 +45,12 @@
     if (S.signedIn) {
       exec('auth.sendOtp', { phone: S.phone }, null, { instant: true }).then(function () { return exec('auth.verifyOtp', { code: D.DEMO_CODES.driverOtp }, null, { instant: true }); }).then(function () {
         prime(S.stage); ready = true;
-        if (UI.sid === 'D01') UI.go(S.stage === 'active' ? 'D05' : S.stage === 'submitted' || S.stage === 'approved' ? 'D04' : S.stage === 'none' ? 'D02' : 'D03', { replace: true });
+        if (UI.sid === 'D01') {
+          var live = UI.engine && UI.engine.activeRide && UI.engine.activeRide();
+          var tripSid = live && RN.engineLib && RN.engineLib.driverScreen ? RN.engineLib.driverScreen(live, UI.engine.state.persona) : null;
+          var home = S.stage === 'active' ? 'D05' : S.stage === 'submitted' || S.stage === 'approved' ? 'D04' : S.stage === 'none' ? 'D02' : 'D03';
+          UI.go(tripSid || home, { replace: true });
+        }
       });
     } else ready = true;
   }, 150);

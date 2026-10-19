@@ -1,0 +1,10 @@
+var fs = require('fs');
+var h = fs.readFileSync(__dirname + '/../customer-app/index.html', 'utf8');
+var i = h.indexOf('data-sid="R03"');
+var j = h.indexOf('</section>', i);
+console.log(h.slice(i, j + 10));
+var a = h.indexOf('data-sid="R58"');
+var b = h.indexOf('</section>', a);
+console.log('\n---R58---\n');
+console.log(h.slice(a, b + 10).indexOf('DEMO') >= 0 ? 'HAS DEMO' : 'NO DEMO');
+console.log(h.slice(a, Math.min(b, a + 1800)));

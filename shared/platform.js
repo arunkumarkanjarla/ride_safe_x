@@ -16,7 +16,21 @@
   function defaults() { return clone(window.RN_PLATFORM_DEFAULT || { schema: SCHEMA, version: 1 }); }
   function blankOps() { return { kyc: {}, drivers: {}, customers: {}, wallet: [], partnerApps: {}, menuHidden: {}, bookings: {}, cmds: [], sos: {}, tickets: [], audit: [] }; }
   var rawC = null, rawO = null, cfg = null, ops = null;
-  function loadCfg() { rawC = rd(KEY); var d = defaults(); if (!rawC) { cfg = d; return; } try { var s = JSON.parse(rawC); cfg = s && s.schema === SCHEMA ? merge(d, s) : d; } catch (e) { cfg = d; } }
+  function unionById(baseList, overList) {
+    var map = {}, out = [];
+    (baseList || []).forEach(function (v) { if (v && v.id != null) map[v.id] = clone(v); });
+    (overList || []).forEach(function (v) { if (v && v.id != null) map[v.id] = isObj(map[v.id]) ? merge(map[v.id], v) : clone(v); });
+    Object.keys(map).forEach(function (k) { out.push(map[k]); });
+    return out;
+  }
+  function loadCfg() {
+    rawC = rd(KEY); var d = defaults(); if (!rawC) { cfg = d; return; }
+    try {
+      var s = JSON.parse(rawC);
+      cfg = s && s.schema === SCHEMA ? merge(d, s) : d;
+      if (cfg && d.vehicles) cfg.vehicles = unionById(d.vehicles, (s && s.vehicles) || cfg.vehicles);
+    } catch (e) { cfg = d; }
+  }
   function loadOps() { rawO = rd(OPS); var b = blankOps(); if (!rawO) { ops = b; return; } try { ops = merge(b, JSON.parse(rawO) || {}); } catch (e) { ops = b; } }
   loadCfg(); loadOps();
   var subs = [], chan = null;
@@ -109,7 +123,19 @@
     broadcastsFor: function (app) { var now = Date.now(); return (cfg.broadcasts || []).filter(function (b) { return b.on && (!b.apps || !b.apps.length || b.apps.indexOf(app) >= 0) && (!b.ends || new Date(b.ends).getTime() > now); }); },
     flag: function (k) { return !!(cfg.flags || {})[k]; },
     rs: function (p) { return '\u20B9' + (Math.round(p) / 100).toLocaleString('en-IN', { minimumFractionDigits: p % 100 ? 2 : 0, maximumFractionDigits: 2 }); },
-    uid: function (p) { return (p || 'ID') + '-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase(); }
+    uid: function (p) { return (p || 'ID') + '-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase(); },
+    // Safe booking upsert into ops (preserves admin "Cancelled by RideNova" overrides). Demo sync only.
+    bookingUpsert: function (b) {
+      if (!b || !b.id) return null;
+      var out = null;
+      RNPC.opsUpdate(function (o) {
+        var old = o.bookings[b.id];
+        if (old && /RideNova/.test(old.status || '') && !/RideNova/.test(b.status || '')) { out = old; return; }
+        out = o.bookings[b.id] = Object.assign({}, old || {}, b);
+      });
+      return out;
+    },
+    bookingGet: function (id) { return (ops.bookings || {})[id] || null; }
   };
 
   // ---------------- shared app chrome: broadcast banners + maintenance overlay

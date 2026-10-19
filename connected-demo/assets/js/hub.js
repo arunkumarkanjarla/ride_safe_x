@@ -1,8 +1,9 @@
 /* RideNova prototype – connected demo (connected-demo/index.html).
-   Owns ONE in-memory engine and shows several apps in frames of this page. Each app finds window.parent.RN_HUB
+   Owns ONE shared engine and shows several apps in frames of this page. Each app finds window.parent.RN_HUB
    (possible only when this page and the apps share an origin, e.g. a local web server) and uses this engine,
    so a ride booked in the customer app is the same ride in the driver app and the admin portal.
-   Nothing is stored: reloading this page resets the shared demo. */
+   Engine state persists to localStorage "ridenova.demo.v1" so a same-origin reload restores the scenario;
+   Reset clears that key. Not multi-device sync. */
 (function () {
   'use strict';
   var RN = window.RN, LIB = RN.engineLib;
@@ -10,7 +11,9 @@
   var URLS = (window.RN_CONFIG && window.RN_CONFIG.apps) || {};
   function appUrl(app) { return URLS[app] || '../' + DIR[app] + '/index.html'; }
   var ENTRY = { rider: 'R01', driver: 'D01', partner: 'P08', admin: 'A01', support: 'G01' };
-  var engine = new RN.Engine({ storage: LIB.memoryStorage(), fresh: true });
+  var store = (LIB.browserStorage && LIB.browserStorage()) || LIB.memoryStorage();
+  var prior = null; try { prior = store.get(LIB.KEY || 'ridenova.demo.v1'); } catch (err) { prior = null; }
+  var engine = new RN.Engine({ storage: store, fresh: !prior });
   var registered = [];
   function q(s) { return document.querySelector(s); }
   function qa(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
@@ -82,7 +85,7 @@
       engine.reset(sc.id);
       sc.apps.slice(0, 3).forEach(function (app, k) { load(k, app, app === RN_SCREENS[sc.start].app ? sc.start : null); });
     });
-    q('[data-hub="reset"]').addEventListener('click', function () { engine.reset('A', true); for (var k = 0; k < 3; k++) load(k, panes[k].app); });
+    q('[data-hub="reset"]').addEventListener('click', function () { try { engine.clearStorage(); } catch (err) {} engine.reset('A', true); for (var k = 0; k < 3; k++) load(k, panes[k].app); });
     q('[data-hub="auto"]').addEventListener('change', function (e) { ['driver', 'partner', 'courier', 'support'].forEach(function (k) { engine.setOption('auto.' + k, e.target.value === 'auto'); }); });
     var on = function (k, fn) { q('[data-hub="' + k + '"]').addEventListener('change', function (e) { fn(e.target.value); }); };
     on('speed', function (v) { engine.setOption('fast', v === 'fast'); });

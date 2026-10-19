@@ -21,8 +21,11 @@ window.RN_PLATFORM_DEFAULT = {
   vehicles: [
     { id: 'Bike', label: 'Bike', icon: 'bike', on: true, order: 1, seats: 1, eta: 2, note: 'Helmet provided \u00B7 1 seat' },
     { id: 'Auto', label: 'Auto', icon: 'auto', on: true, order: 2, seats: 3, eta: 4, note: 'Metered fare \u00B7 3 seats' },
-    { id: 'Cab', label: 'Cab', icon: 'car', on: true, order: 3, seats: 4, eta: 3, note: 'AC \u00B7 4 seats' },
-    { id: 'Premium', label: 'Premium', icon: 'car2', on: true, order: 4, seats: 4, eta: 6, note: 'Top-rated drivers \u00B7 sedan' }
+    { id: 'Cab', label: 'Hatch AC', icon: 'car', on: true, order: 3, seats: 4, eta: 3, note: 'AC \u00B7 4 seats' },
+    { id: 'CabNonAC', label: 'Hatch Non-AC', icon: 'car', on: true, order: 4, seats: 4, eta: 4, note: 'Non-AC \u00B7 4 seats' },
+    { id: 'CabSUV', label: 'SUV AC', icon: 'car2', on: true, order: 5, seats: 7, eta: 5, note: 'AC \u00B7 7 seats' },
+    { id: 'CabMUV', label: 'MUV Non-AC', icon: 'car2', on: true, order: 6, seats: 7, eta: 6, note: 'Non-AC \u00B7 7 seats' },
+    { id: 'Premium', label: 'Premium', icon: 'car2', on: true, order: 7, seats: 4, eta: 6, note: 'Top-rated drivers \u00B7 sedan AC' }
   ],
   pricing: {
     taxPct: 5, currency: 'INR',
@@ -38,12 +41,18 @@ window.RN_PLATFORM_DEFAULT = {
         Bike: { base: 20, perKm: 6.5, perMin: 0.8, minFare: 30, bookingFee: 0, freeWaitMin: 3, waitPerMin: 1, cancelFee: 10, nightPct: 0, commissionPct: 15 },
         Auto: { base: 30, perKm: 11, perMin: 1, minFare: 45, bookingFee: 0, freeWaitMin: 3, waitPerMin: 1.5, cancelFee: 12, nightPct: 0, commissionPct: 15 },
         Cab: { base: 50, perKm: 14.5, perMin: 1.5, minFare: 70, bookingFee: 0, freeWaitMin: 4, waitPerMin: 2, cancelFee: 15, nightPct: 0, commissionPct: 20 },
+        CabNonAC: { base: 42, perKm: 12, perMin: 1.2, minFare: 60, bookingFee: 0, freeWaitMin: 4, waitPerMin: 1.5, cancelFee: 12, nightPct: 0, commissionPct: 18 },
+        CabSUV: { base: 85, perKm: 19, perMin: 2, minFare: 120, bookingFee: 0, freeWaitMin: 5, waitPerMin: 2.5, cancelFee: 20, nightPct: 0, commissionPct: 20 },
+        CabMUV: { base: 72, perKm: 16.5, perMin: 1.7, minFare: 100, bookingFee: 0, freeWaitMin: 5, waitPerMin: 2, cancelFee: 18, nightPct: 0, commissionPct: 18 },
         Premium: { base: 80, perKm: 21, perMin: 2.2, minFare: 110, bookingFee: 0, freeWaitMin: 5, waitPerMin: 3, cancelFee: 25, nightPct: 0, commissionPct: 22 }
       },
       BLR: {
         Bike: { base: 25, perKm: 7, perMin: 1, minFare: 35, bookingFee: 0, freeWaitMin: 3, waitPerMin: 1, cancelFee: 10, nightPct: 0, commissionPct: 15 },
         Auto: { base: 36, perKm: 15, perMin: 1, minFare: 50, bookingFee: 0, freeWaitMin: 3, waitPerMin: 1.5, cancelFee: 15, nightPct: 50, commissionPct: 15 },
         Cab: { base: 60, perKm: 16, perMin: 1.5, minFare: 90, bookingFee: 5, freeWaitMin: 4, waitPerMin: 2, cancelFee: 20, nightPct: 10, commissionPct: 20 },
+        CabNonAC: { base: 50, perKm: 13.5, perMin: 1.3, minFare: 75, bookingFee: 0, freeWaitMin: 4, waitPerMin: 1.5, cancelFee: 15, nightPct: 10, commissionPct: 18 },
+        CabSUV: { base: 95, perKm: 21, perMin: 2.2, minFare: 140, bookingFee: 5, freeWaitMin: 5, waitPerMin: 2.5, cancelFee: 25, nightPct: 10, commissionPct: 20 },
+        CabMUV: { base: 80, perKm: 18, perMin: 1.8, minFare: 120, bookingFee: 5, freeWaitMin: 5, waitPerMin: 2, cancelFee: 20, nightPct: 10, commissionPct: 18 },
         Premium: { base: 90, perKm: 22, perMin: 2.5, minFare: 130, bookingFee: 5, freeWaitMin: 5, waitPerMin: 3, cancelFee: 30, nightPct: 10, commissionPct: 22 }
       }
     }

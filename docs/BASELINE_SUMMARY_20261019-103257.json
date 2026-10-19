@@ -1,0 +1,42 @@
+﻿[
+    {
+        "suite":  "test-customer.js",
+        "exit":  0,
+        "pass":  true
+    },
+    {
+        "suite":  "test-driver.js",
+        "exit":  0,
+        "pass":  true
+    },
+    {
+        "suite":  "test-partner.js",
+        "exit":  0,
+        "pass":  true
+    },
+    {
+        "suite":  "test-admin.js",
+        "exit":  0,
+        "pass":  true
+    },
+    {
+        "suite":  "test-agent.js",
+        "exit":  0,
+        "pass":  true
+    },
+    {
+        "suite":  "test-ux.js",
+        "exit":  0,
+        "pass":  true
+    },
+    {
+        "suite":  "test-admin-control.js",
+        "exit":  0,
+        "pass":  true
+    },
+    {
+        "suite":  "test-flows.js",
+        "exit":  0,
+        "pass":  true
+    }
+]

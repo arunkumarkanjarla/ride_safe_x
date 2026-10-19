@@ -36,3 +36,10 @@ Design: docs-analysis/ADMIN-CONTROL-DESIGN.md. Backup: D:\git\ride_safe_x_backup
 - Test: docs-analysis/test-admin-control.js (51 checks).
 - Run: `py -m http.server 8080` at the repo root, then open http://localhost:8080/admin/control.html (sign in through A01 first). The apps must share the same origin to share config; file:// works inside a single browser profile.
 - Limits: booking commands change the mirrored booking records, not the deep engine ride state; the old admin A-screens keep their own store (they link to Platform control, with no two-way sync).
+
+## Round 4 - P0 ops bridge (19 Oct 2026)
+- `admin/assets/js/admin-extra.js`: A05 goodwill credit and block/unblock write canonical `ridenova.ops.v1` (`ops.wallet`, `ops.customers`); A11 refunds append ops wallet rows when rider phone is resolvable; A05 lists live ops customers; busy-guards reduce duplicate mutations.
+- `docs-analysis/test-admin.js`: asserts ops ledger + block sync after A05 finance/super-admin actions.
+- Docs: `docs/PHASE_P0_OPS_BRIDGE.md`, IMPLEMENTATION_PLAN, DEFECT_REGISTER (L3 narrowed), EXISTING_ARCHITECTURE, COORDINATION.
+- Synthetic `ridenova.admin.v1` seed tables retained (no destructive reset). Platform Control remains authoritative for config.
+
